@@ -1,4 +1,5 @@
 import javax.xml.transform.Result;
+import java.io.File;
 import java.sql.*;
 import java.util.ArrayList;
 
@@ -11,6 +12,8 @@ public class DataRetriever {
     public static DataRetriever getInstance() {
         if (dataRetriever == null) {
             dataRetriever = new DataRetriever();
+            if (!new File("soo2Werkab.db").exists())
+                dataRetriever.Builder();
             return dataRetriever;
         }
         return dataRetriever;
@@ -344,7 +347,7 @@ public class DataRetriever {
     }
 
 
-    public void Builder() {
+     void Builder() {
         this.AccountDB();
         this.driverAccountsDB();
         this.carDriverDB();
@@ -375,13 +378,13 @@ public class DataRetriever {
         return new User();
     }
 
- /*   public void changeStateDB(String username) {
+    public void changeStateDB(String username, int value) {
         try {
             Class.forName("org.sqlite.JDBC");
             c = DriverManager.getConnection("jdbc:sqlite:soo2Werkab.db");
             stmt = c.createStatement();
             String sql = "UPDATE Accounts\n " +
-                    "SET isSuspended = 1\n" +
+                    "SET isSuspended = " + value + "\n" +
                     "WHERE UserName = " + username + ";";
             stmt.executeUpdate(sql);
             stmt.close();
@@ -390,6 +393,5 @@ public class DataRetriever {
             System.err.println( e.getClass().getName() + ": " + e.getMessage() );
             System.exit(0);
         }
-        System.out.println("Opened database successfully");
-    }*/
+    }
 }

@@ -5,6 +5,7 @@ public class Main {
     static boolean isLoggedIn = false,isDriver = false;
     static Scanner in = new Scanner(System.in);
     static String username,password,email,phoneNo;
+    DataRetriever d = DataRetriever.getInstance();
     public static void main(String[] args) {
         System.out.println("Welcome to soo2Werkab");
         System.out.println("1- Login\n2- Register");
