@@ -1,5 +1,6 @@
 public class User {
     Account account;
+    UserStatus status;
     CarRequest currentRequest;
 
     void requestRide(Area source, Area destination) {
@@ -7,14 +8,14 @@ public class User {
             currentRequest = new CarRequest(this, source, destination);
     }
 
-//    void rateDriver(int stars) {
-//        currentRequest.rate(stars);
-//    }
-//
-//    String getDriverRating() {
-//        if (currentRequest != null)
-//            return currentRequest.getRating();
-//        return "You are not in a ride!";
-//    }
+    void rateDriver(int stars) {
+        currentRequest.rate(stars);
+    }
+
+    String getDriverRating() {
+        if (currentRequest != null)
+            return currentRequest.getRating();
+        return "You are not in a ride!";
+    }
 
 }
