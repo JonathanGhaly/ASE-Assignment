@@ -5,6 +5,7 @@ public class Driver {
     boolean isVerified;
     boolean isAccepted;
 
+
     String showRating() {
         return "Your current rating is: " + DataRetriever.getRating(this);
     }
