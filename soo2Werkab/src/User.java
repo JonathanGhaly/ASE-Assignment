@@ -17,5 +17,4 @@ public class User {
         return "You are not in a ride!";
     }
 
-
 }
