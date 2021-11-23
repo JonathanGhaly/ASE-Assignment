@@ -394,4 +394,36 @@ public class DataRetriever {
             System.exit(0);
         }
     }
+
+    public void verifyDriverDB(Integer id) {
+        try {
+            Class.forName("org.sqlite.JDBC");
+            c = DriverManager.getConnection("jdbc:sqlite:soo2Werkab.db");
+            stmt = c.createStatement();
+            String sql = "UPDATE DriverAccount\n" +
+                    "SET IsVerified = 1\n" +
+                    "WHERE DriverID = " + id + ";";
+            stmt.executeUpdate(sql);
+            stmt.close();
+            c.close();
+        } catch ( Exception e ) {
+            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+            System.exit(0);
+        }
+    }
+
+    public int getID(String username) {
+        int id = -1;
+        String sql = "SELECT IDAccount FROM Accounts Where UserName = " + username + ";";
+        try (Connection conn = this.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
+            id = rs.getInt( "IDAccount");
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        }
+        return id;
+    }
 }

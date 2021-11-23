@@ -16,7 +16,7 @@ public class Admin {
     }
 
     public void verifyDriver(Driver driver) {
-
+        dataRetriever.verifyDriverDB(dataRetriever.getID(driver.account.getUsername()));
     }
 
     public void manageUser(User user) {
