@@ -2,6 +2,10 @@ import java.util.ArrayList;
 
 public class CarDriver extends Driver {
 
+    public CarDriver(Account a, String nationalID, String drivingLicenseNumber) {
+        super(a, nationalID, drivingLicenseNumber);
+    }
+
     public ArrayList<Ride> listAllRides() { //TODO query rides on favourite area for Driver
         ArrayList<Ride> rides = new ArrayList<>();
 

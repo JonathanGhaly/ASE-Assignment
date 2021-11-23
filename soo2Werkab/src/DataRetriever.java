@@ -227,4 +227,39 @@ public class DataRetriever {
     static int getRating(Driver driver) {
         return 0;
     }
+
+    public User getUserDB(Integer id) {
+
+        String sql = "select * from UserAccount\nwhere AccountId = " + id + ";";
+        try(Connection conn = this.connect();
+            PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery( sql );
+            accountId = rs.getInt("AccountID");
+            pstmt.setInt(1,accountId);
+            pstmt.executeUpdate();
+        } catch ( Exception e ) {
+            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+            System.exit(0);
+        }
+        return new User();
+    }
+
+ /*   public void changeStateDB(String username) {
+        try {
+            Class.forName("org.sqlite.JDBC");
+            c = DriverManager.getConnection("jdbc:sqlite:soo2Werkab.db");
+            stmt = c.createStatement();
+            String sql = "UPDATE Accounts\n " +
+                    "SET isSuspended = 1\n" +
+                    "WHERE UserName = " + username + ";";
+            stmt.executeUpdate(sql);
+            stmt.close();
+            c.close();
+        } catch ( Exception e ) {
+            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+            System.exit(0);
+        }
+        System.out.println("Opened database successfully");
+    }*/
 }

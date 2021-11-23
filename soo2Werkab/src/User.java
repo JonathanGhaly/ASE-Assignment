@@ -8,12 +8,12 @@ public class User {
     }
 
     void rateDriver(int stars) {
-        currentRequest.rate(stars);
+        //currentRequest.rate(stars);
     }
 
     String getDriverRating() {
-        if (currentRequest != null)
-            return currentRequest.getRating();
+       // if (currentRequest != null)
+            //return currentRequest.getRating();
         return "You are not in a ride!";
     }
 
