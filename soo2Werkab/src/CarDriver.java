@@ -2,8 +2,13 @@ import java.util.ArrayList;
 
 public class CarDriver extends Driver {
 
-    public CarDriver(Account a, String nationalID, String drivingLicenseNumber) {
-        super(a, nationalID, drivingLicenseNumber);
+
+    DataRetriever db = DataRetriever.getInstance();
+
+    CarDriver(Account a, String nationalID, String drivingLicenseNumber) {
+        this.account = a;
+        this.nationalID = nationalID;
+        this.drivingLicenseNumber = drivingLicenseNumber;
     }
 
     public ArrayList<Ride> listAllRides() { //TODO query rides on favourite area for Driver
@@ -12,13 +17,13 @@ public class CarDriver extends Driver {
         return rides;
     }
 
-    public void addFavouriteArea(Area area) { //TODO add area to DB
-
+    public void addFavouriteArea(Area area) {
+        db.insertCarDriverFavouriteArea(this, area);
     }
 
     public ArrayList<Area> getFavouriteAreas() { //TODO query favourite areas according to driver
         ArrayList<Area> areas = new ArrayList<>();
-
+        db.getCarDriverFavouriteArea(this);
         return areas;
     }
 
