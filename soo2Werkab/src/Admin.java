@@ -7,12 +7,8 @@ public class Admin {
 
     }
 
-    public void suspend(Account account) {
-        dataRetriever.changeStateDB(account.getUsername(), 1);
-    }
-
-    public void unsuspend(Account account) {
-        dataRetriever.changeStateDB(account.getUsername(), 0);
+    public void suspend(Account account, int type) {
+        dataRetriever.changeStateDB(account.getUsername(), type);
     }
 
     public void verifyDriver(Driver driver) {
