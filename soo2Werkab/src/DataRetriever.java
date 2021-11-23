@@ -4,8 +4,8 @@ public class DataRetriever {
     Connection c = null;
     Statement stmt;
     static DataRetriever dataRetriever;
-
-    public DataRetriever() {
+    int accountId;
+    public Connection connect() {
         try {
             Class.forName("org.sqlite.JDBC");
             c = DriverManager.getConnection("jdbc:sqlite:soo2Werkab.db");
@@ -15,6 +15,7 @@ public class DataRetriever {
             System.exit(0);
         }
         System.out.println("Opened database successfully");
+        return c;
     }
     public void AccountDB(){
         try {
@@ -23,7 +24,7 @@ public class DataRetriever {
             stmt = c.createStatement();
             String sql = "CREATE TABLE Accounts " +
                     "(IDAccount INTEGER PRIMARY KEY     NOT NULL," +
-                    " UserName       CHAR(50)    NOT NULL, " +
+                    " UserName       CHAR(50)    NOT NULL UNIQUE , " +
                     " Password       CHAR(50)         NOT NULL, " +
                     " Email          CHAR(50)  NULL , " +
                     " mobileNo         CHAR(11) NOT NULL ,"+
@@ -138,6 +139,58 @@ public class DataRetriever {
             System.exit(0);
         }
         System.out.println("Opened database successfully");
+    }
+    public void AccountRegister(Account a){
+        String sql = "INSERT INTO Accounts (IDAccount,UserName,Password,Email,mobileNo,isSuspended,create_time) VALUES (?,?,?,?,?,?,?)" ;
+        try(Connection conn = this.connect();
+            PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery( "SELECT max(IDAccount) AS MAX FROM Accounts ;" );
+            accountId = rs.getInt("MAX")+1;
+            pstmt.setInt(1,accountId);
+            pstmt.setString(2,a.getUsername());
+            pstmt.setString(3,a.getPassword());
+            pstmt.setString(4,a.getEmail());
+            pstmt.setString(5,a.getMobileNumber());
+            pstmt.setInt(6,0);
+            pstmt.executeUpdate();
+        } catch ( Exception e ) {
+            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+            System.exit(0);
+        }
+        System.out.println("Records created successfully");
+    }
+    public void UserRegister(Account a){
+        AccountRegister(a);
+        String sql = "INSERT INTO UserAccounts (AccountID) VALUES (?)" ;
+        try(Connection conn = this.connect();
+            PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery( "SELECT max(IDAccount) AS MAX FROM Accounts ;" );
+            accountId = rs.getInt("MAX");
+            pstmt.setInt(1,accountId);
+            pstmt.executeUpdate();
+        } catch ( Exception e ) {
+            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+            System.exit(0);
+        }
+        System.out.println("Records created successfully");
+    }
+    public void DriverRegister(Account a){
+        AccountRegister(a);
+        String sql = "INSERT INTO DriverAccount (DriverID,LicenceNo,NationalID) VALUES (?,?,?)" ;
+        try(Connection conn = this.connect();
+            PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery( "SELECT max(IDAccount) AS MAX FROM Accounts ;" );
+            accountId = rs.getInt("MAX");
+            pstmt.setInt(1,accountId);
+            pstmt.executeUpdate();
+        } catch ( Exception e ) {
+            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+            System.exit(0);
+        }
+        System.out.println("Records created successfully");
     }
     static int getRating(Driver driver) {
         return 0;
