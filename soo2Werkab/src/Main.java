@@ -2,7 +2,7 @@ import java.util.Scanner;
 
 public class Main {
     static int choice;
-    static boolean isLoggedIn = false;
+    static boolean isLoggedIn = false,isDriver = false;
     static Scanner in = new Scanner(System.in);
     static String username,password,email,phoneNo;
     public static void main(String[] args) {
@@ -16,6 +16,7 @@ public class Main {
               System.out.println("Please enter the password: ");
               password=in.next();
               Login l = new Login(username,password);
+              isDriver = l.isDriver;
               isLoggedIn=true;
               break;
           case 2:
@@ -45,7 +46,13 @@ public class Main {
               phoneNo="";
               break;
       }while(isLoggedIn){
-
+            if(isDriver){
+                System.out.println("I am driver");
+                break;
+            }else{
+                System.out.println("I amnot a driver");
+                break;
+            }
         }
     }
 }
