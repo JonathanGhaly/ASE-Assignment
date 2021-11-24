@@ -15,6 +15,10 @@ public class User {
             currentRequest = new CarRequest(this, source, destination);
     }
 
+    void reviewOffers(){
+
+    }
+
 //    void rateDriver(int stars) {
 //        currentRequest.rate(stars);
 //    }

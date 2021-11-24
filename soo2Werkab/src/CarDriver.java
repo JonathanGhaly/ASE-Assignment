@@ -36,4 +36,8 @@ public class CarDriver extends Driver {
     public void removeFavouriteArea(Area area) {
         db.removeCarDriverFavouriteArea(this,area);
     }
+
+    public void sendOffer(Ride ride,Double offer){
+        db.makeDriverOffer(this,offer,ride);
+    }
 }

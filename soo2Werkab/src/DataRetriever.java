@@ -12,7 +12,7 @@ public class DataRetriever {
     public static DataRetriever getInstance() {
         if (dataRetriever == null) {
             dataRetriever = new DataRetriever();
-            if (!new File("soo2Werkab.db").exists())
+            if (! new File("soo2Werkab.db").exists())
                 dataRetriever.Builder();
             return dataRetriever;
         }
@@ -132,7 +132,7 @@ public class DataRetriever {
                     "(DriverID INTEGER ," +
                     "LicenceNo CHAR(50) NOT NULL ," +
                     "Areas CHAR(50) NULL," +
-                    "FOREIGN KEY(DriverID)  REFERENCES DriverAccount(DriverID)"+
+                    "FOREIGN KEY(DriverID)  REFERENCES DriverAccount(DriverID)" +
                     "UNIQUE(DriverID,Areas))";
             stmt.executeUpdate(sql);
             stmt.close();
@@ -371,6 +371,7 @@ public class DataRetriever {
         }
     }
 
+
     User getUser(String username) {
         String sql = "SELECT IDAccount,UserName,Password,Email,mobileNo "
                 + " FROM Accounts where UserName = ?";
@@ -410,6 +411,21 @@ public class DataRetriever {
         return rides;
     }
 
+    public void removeCarDriverFavouriteArea(Driver carDriver, Area area) {
+        try (Connection conn = this.connect()) {
+            //TODO query id to remove specific area
+            String sql = "SELECT IDAccount FROM Accounts WHERE UserName = " + carDriver.account.getUsername() + ";";
+            stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
+            int id = rs.getInt("IDAccount");
+            sql = "DELETE FROM CarDriver WHERE DriverID = " + id + " AND Areas = " + area.toString() + ";";
+            stmt.executeQuery(sql);
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        }
+    }
+
 
      void Builder() {
         this.AccountDB();
@@ -428,15 +444,15 @@ public class DataRetriever {
     public User getUserDB(Integer id) {
 
         String sql = "select * from UserAccount\nwhere AccountId = " + id + ";";
-        try(Connection conn = this.connect();
-            PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (Connection conn = this.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
             stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery( sql );
+            ResultSet rs = stmt.executeQuery(sql);
             accountId = rs.getInt("AccountID");
-            pstmt.setInt(1,accountId);
+            pstmt.setInt(1, accountId);
             pstmt.executeUpdate();
-        } catch ( Exception e ) {
-            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
             System.exit(0);
         }
         return new User();
@@ -453,8 +469,8 @@ public class DataRetriever {
             stmt.executeUpdate(sql);
             stmt.close();
             c.close();
-        } catch ( Exception e ) {
-            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
             System.exit(0);
         }
     }
@@ -470,24 +486,77 @@ public class DataRetriever {
             stmt.executeUpdate(sql);
             stmt.close();
             c.close();
-        } catch ( Exception e ) {
-            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
             System.exit(0);
         }
     }
 
     public int getID(String username) {
-        int id = -1;
+        int id = - 1;
         String sql = "SELECT IDAccount FROM Accounts Where UserName = " + username + ";";
         try (Connection conn = this.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
-            id = rs.getInt( "IDAccount");
+            id = rs.getInt("IDAccount");
         } catch (Exception e) {
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
             System.exit(0);
         }
         return id;
     }
+
+    public void makeCarRequest(CarRequest carRequest) {
+        String sql = "INSERT INTO Requests (RequestID,DriverID,CustomerID,RideID,driverOffer,isAccepted) VALUES (?,?,?,?,?,?)";
+        try (Connection conn = this.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery("SELECT max(RequestID) AS MAX FROM Requests;");
+            int reqID = rs.getInt("MAX") + 1;
+            carRequest.carRequestID = reqID;
+            pstmt.setInt(1, reqID);
+            pstmt.setInt(2, getID(carRequest.carDriver.account.getUsername()));
+            pstmt.setInt(3, getID(carRequest.client.account.getUsername()));
+            pstmt.setInt(4, carRequest.ride.getRideID());
+            pstmt.setDouble(5, 0);
+            pstmt.setInt(6, 0);
+            pstmt.executeUpdate();
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        }
+    }
+
+    public void updateCarRequest(CarRequest carRequest) {
+        try (Connection conn = this.connect()) {
+            String sql = "UPDATE Requests SET DriverID = " + getID(carRequest.carDriver.account.getUsername()) + "," +
+                    "driverOffer = " + carRequest.driverOffer + ", isAccepted = " + carRequest.isAccepted +
+                    " Where RequestID = " + carRequest.carRequestID + ";";
+            stmt = conn.createStatement();
+            stmt.executeQuery(sql);
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        }
+    }
+
+    public void makeDriverOffer(CarDriver cardriver, Double offer, Ride ride) {
+        try (Connection conn = this.connect()) {
+            String sql="UPDATE Requests SET driverOffer = "+offer+",DriverID ="+ getID(cardriver.account.getUsername()) +
+                    " WHERE RideID = "+ride.getRideID()+";";
+            stmt = conn.createStatement();
+            stmt.executeQuery(sql);
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        }
+    }
+
+    public Double getDriverOffer(User user){
+
+
+    }
+
+
 }
