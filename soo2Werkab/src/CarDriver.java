@@ -33,7 +33,7 @@ public class CarDriver extends Driver {
         return areas;
     }
 
-    public void removeFavouriteArea(Area area) { //TODO remove favourite area
-
+    public void removeFavouriteArea(Area area) {
+        db.removeCarDriverFavouriteArea(this,area);
     }
 }
