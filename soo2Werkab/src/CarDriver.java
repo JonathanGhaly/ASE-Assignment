@@ -4,7 +4,9 @@ public class CarDriver extends Driver {
 
 
     DataRetriever db = DataRetriever.getInstance();
+    CarDriver(){
 
+    }
     CarDriver(Account a, String nationalID, String drivingLicenseNumber) {
         this.account = a;
         this.nationalID = nationalID;
@@ -23,7 +25,7 @@ public class CarDriver extends Driver {
 
     public ArrayList<Area> getFavouriteAreas() { //TODO query favourite areas according to driver
         ArrayList<Area> areas = new ArrayList<>();
-        db.getCarDriverFavouriteArea(this);
+        areas = db.getCarDriverFavouriteArea(this);
         return areas;
     }
 

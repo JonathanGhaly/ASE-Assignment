@@ -1,5 +1,6 @@
 import javax.xml.transform.Result;
 import java.sql.*;
+import java.util.ArrayList;
 
 public class DataRetriever {
     Connection c = null;
@@ -224,20 +225,22 @@ public class DataRetriever {
     public Boolean Login(Login acc) {
         String sql = "SELECT Password "
                 + " FROM Accounts where UserName = ?";
-        String sql2 = "SELECT isSuspended "+
+        String sql2 = "SELECT isSuspended " +
                 "FROM Accounts where UserName = ?";
         try (Connection conn = this.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql);
              PreparedStatement pstmt2 = conn.prepareStatement(sql2)
-             ) {
+        ) {
             pstmt.setString(1, acc.username);
             ResultSet rs = pstmt.executeQuery();
             if (rs.getString("Password").equals(acc.password)) {
-                pstmt2.setString(1,acc.username);
+                pstmt2.setString(1, acc.username);
                 rs = pstmt2.executeQuery();
-                if(rs.getInt("isSuspended")==0)
+                if (rs.getInt("isSuspended") == 0){
+                    acc.isDriver = this.isDriver(acc);
                     return true;
-                else{
+                }
+                else {
                     System.out.println("The account is suspended");
                     return false;
                 }
@@ -250,24 +253,27 @@ public class DataRetriever {
         return false;
     }
 
-    //add national id col
-    public void addNationalID() {
-
-        try {
-            Class.forName("org.sqlite.JDBC");
-            c = DriverManager.getConnection("jdbc:sqlite:soo2Werkab.db");
-            stmt = c.createStatement();
-            String sql = "ALTER TABLE Accounts\n " +
-                    "ADD CONSTRAINT UserName UNIQUE ;";
-            stmt.executeUpdate(sql);
-            stmt.close();
-            c.close();
+    Boolean isDriver(Login acc) {
+        String sql = "SELECT IDAccount "
+                + " FROM Accounts where UserName = ?";
+        String sql2 = "SELECT DriverID " +
+                "FROM DriverAccount where DriverID = ?";
+        try (Connection conn = this.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             PreparedStatement pstmt2 = conn.prepareStatement(sql2)
+        ) {
+            pstmt.setString(1, acc.username);
+            ResultSet rs = pstmt.executeQuery();
+            pstmt2.setInt(1,rs.getInt("IDAccount"));
+            ResultSet rs2 = pstmt2.executeQuery();
+            int id = rs2.getInt("DriverID");
+            return true;
         } catch (Exception e) {
-            System.err.println(e.getClass().getName() + ": " + e.getMessage());
-            System.exit(0);
+            return false;
         }
-        System.out.println("Opened database successfully");
     }
+
+
 
     public void insertRide(Ride ride) {
         String sql = "INSERT INTO Rides (IDRides,SourceArea,DestinationArea,RideStatus) Values(?,?,?,?)";
@@ -302,11 +308,16 @@ public class DataRetriever {
 
     public void insertCarDriverFavouriteArea(CarDriver carDriver, Area area) {
         String sql = "INSERT INTO CarDriver (DriverID,LicenceNo,Areas) Values(?,?,?)";
+        String sql2= "SELECT IDAccount FROM Accounts where UserName = ?"+";";
         try (Connection conn = this.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             PreparedStatement pstmt2 = conn.prepareStatement(sql2)
+        ) {
             stmt = conn.createStatement();
             String username = carDriver.account.getUsername();
-            ResultSet rs = stmt.executeQuery("SELECT IDAcount FROM Account where UserName = " + username + ";");
+            pstmt2.setString(1,username);
+         //   ResultSet rs = stmt.executeQuery("SELECT IDAccount FROM Accounts where UserName = " + username + ";");
+            ResultSet rs = pstmt2.executeQuery();
             int id = rs.getInt("IDAccount");
             pstmt.setInt(1, id);
             pstmt.setString(2, carDriver.drivingLicenseNumber);
@@ -319,20 +330,45 @@ public class DataRetriever {
 
     }
 
-    public void getCarDriverFavouriteArea(CarDriver carDriver) {
-
+    public ArrayList<Area> getCarDriverFavouriteArea(CarDriver carDriver) {
+        ArrayList<Area> areas = new ArrayList<>();
         String username = carDriver.account.getUsername();
-        String sql = "SELECT Areas FROM CarDriver Where LicenceNo = ";
+        String sql = "SELECT Areas FROM CarDriver Where LicenceNo = " + carDriver.drivingLicenseNumber + ";";
         try (Connection conn = this.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
+            stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
+            while (rs.next()) {
+                areas.add(new Area(rs.getString("Areas")));
+            }
         } catch (Exception e) {
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
             System.exit(0);
         }
+        return areas;
     }
 
-
+    public CarDriver getCarDriver(String username){
+        String sql = "SELECT IDAccount,UserName,Password,Email,mobileNo "
+                + " FROM Accounts where UserName = ?";
+        String sql2 = "SELECT DriverID,LicenceNo,NationalID " +
+                "FROM DriverAccount where DriverID = ?";
+        try (Connection conn = this.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             PreparedStatement pstmt2 = conn.prepareStatement(sql2)
+        ) {
+            pstmt.setString(1,username);
+            ResultSet rs = pstmt.executeQuery();
+            pstmt2.setInt(1,rs.getInt("IDAccount"));
+            ResultSet rs2 = pstmt2.executeQuery();
+            int id = rs2.getInt("DriverID");
+            Account driver = new Account(rs.getString("UserName"),rs.getString("Password"),rs.getString("Email"),rs.getString("mobileNo"));
+            CarDriver ret = new CarDriver(driver,rs2.getString("NationalID"),rs2.getString("LicenceNo"));
+            return ret;
+        } catch (Exception e) {
+            return null;
+        }
+    }
     public void Builder() {
         this.AccountDB();
         this.driverAccountsDB();
