@@ -12,9 +12,8 @@ public class DataRetriever {
     public static DataRetriever getInstance() {
         if (dataRetriever == null) {
             dataRetriever = new DataRetriever();
-            if (!new File("soo2Werkab.db").exists())
-                dataRetriever.Builder();
-            return dataRetriever;
+            dataRetriever.Builder();
+            dataRetriever.adminAccountRegister(new Account("admin", "admin", "null", "null"));
         }
         return dataRetriever;
     }
@@ -41,7 +40,7 @@ public class DataRetriever {
             Class.forName("org.sqlite.JDBC");
             c = DriverManager.getConnection("jdbc:sqlite:soo2Werkab.db");
             stmt = c.createStatement();
-            String sql = "CREATE TABLE Accounts " +
+            String sql = "CREATE TABLE IF NOT EXISTS Accounts " +
                     "(IDAccount INTEGER PRIMARY KEY     NOT NULL," +
                     " UserName       CHAR(50)    NOT NULL  , " +
                     " Password       CHAR(50)         NOT NULL, " +
@@ -65,7 +64,7 @@ public class DataRetriever {
             Class.forName("org.sqlite.JDBC");
             c = DriverManager.getConnection("jdbc:sqlite:soo2Werkab.db");
             stmt = c.createStatement();
-            String sql = "CREATE TABLE Rides " +
+            String sql = "CREATE TABLE IF NOT EXISTS Rides " +
                     "(IDRides INTEGER PRIMARY KEY     NOT NULL," +
                     " SourceArea       CHAR(50)    NOT NULL, " +
                     " DestinationArea  CHAR(50)         NOT NULL, " +
@@ -85,7 +84,7 @@ public class DataRetriever {
             Class.forName("org.sqlite.JDBC");
             c = DriverManager.getConnection("jdbc:sqlite:soo2Werkab.db");
             stmt = c.createStatement();
-            String sql = "CREATE TABLE UserAccounts " +
+            String sql = "CREATE TABLE IF NOT EXISTS UserAccounts " +
                     "(AccountID INTEGER ," +
                     " UserStatus   TEXT CHECK( UserStatus IN ('Inactive','InRide','Pending','idle') )   NOT NULL DEFAULT 'idle'," +
                     "FOREIGN KEY(AccountID)  REFERENCES Accounts(IDAccount))";
@@ -104,7 +103,7 @@ public class DataRetriever {
             Class.forName("org.sqlite.JDBC");
             c = DriverManager.getConnection("jdbc:sqlite:soo2Werkab.db");
             stmt = c.createStatement();
-            String sql = "CREATE TABLE DriverAccount " +
+            String sql = "CREATE TABLE IF NOT EXISTS DriverAccount " +
                     "(DriverID INTEGER ," +
                     "LicenceNo CHAR(50) NOT NULL ," +
                     "NationalID Char(50) NOT NULL ," +
@@ -130,7 +129,7 @@ public class DataRetriever {
             Class.forName("org.sqlite.JDBC");
             c = DriverManager.getConnection("jdbc:sqlite:soo2Werkab.db");
             stmt = c.createStatement();
-            String sql = "CREATE TABLE Offers" +
+            String sql = "CREATE TABLE  IF NOT EXISTS Offers" +
                     "(DriverID INTEGER ," +
                     "DriverName CHAR(50) NOT NULL ," +
                     "RideID INTEGER NOT NULL ," +
@@ -156,7 +155,7 @@ public class DataRetriever {
             Class.forName("org.sqlite.JDBC");
             c = DriverManager.getConnection("jdbc:sqlite:soo2Werkab.db");
             stmt = c.createStatement();
-            String sql = "CREATE TABLE CarDriver" +
+            String sql = "CREATE TABLE IF NOT EXISTS CarDriver" +
                     "(DriverID INTEGER ," +
                     "LicenceNo CHAR(50) NOT NULL ," +
                     "Areas CHAR(50) NULL," +
@@ -177,7 +176,7 @@ public class DataRetriever {
             Class.forName("org.sqlite.JDBC");
             c = DriverManager.getConnection("jdbc:sqlite:soo2Werkab.db");
             stmt = c.createStatement();
-            String sql = "CREATE TABLE Requests" +
+            String sql = "CREATE TABLE IF NOT EXISTS Requests" +
                     "(RequestID INTEGER PRIMARY KEY NOT NULL ," +
                     "DriverID INTEGER ," +
                     "CustomerID INTEGER ," +
@@ -198,7 +197,7 @@ public class DataRetriever {
     }
 
     private void AccountRegister(Account a) {
-        String sql = "INSERT INTO Accounts (IDAccount,UserName,Password,Email,mobileNo,isSuspended,create_time) VALUES (?,?,?,?,?,?,?)";
+        String sql = "INSERT OR IGNORE INTO Accounts (IDAccount,UserName,Password,Email,mobileNo,isSuspended,create_time) VALUES (?,?,?,?,?,?,?)";
         try (Connection conn = this.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             stmt = conn.createStatement();
@@ -220,7 +219,7 @@ public class DataRetriever {
 
     public void UserRegister(Account a) {
         AccountRegister(a);
-        String sql = "INSERT INTO UserAccounts (AccountID) VALUES (?)";
+        String sql = "INSERT OR IGNORE INTO UserAccounts (AccountID) VALUES (?)";
         try (Connection conn = this.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             stmt = conn.createStatement();
@@ -237,7 +236,7 @@ public class DataRetriever {
 
     public void DriverRegister(Driver d) {
         AccountRegister(d.account);
-        String sql = "INSERT INTO DriverAccount (DriverID,LicenceNo,NationalID) VALUES (?,?,?)";
+        String sql = "INSERT OR IGNORE INTO DriverAccount (DriverID,LicenceNo,NationalID) VALUES (?,?,?)";
         try (Connection conn = this.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             stmt = conn.createStatement();
@@ -255,6 +254,10 @@ public class DataRetriever {
     }
 
     public Boolean Login(Login acc) {
+        if (adminLogin(acc)) {
+            acc.isAdmin = true;
+            return true;
+        }
         String sql = "SELECT Password "
                 + " FROM Accounts where UserName = ?";
         String sql2 = "SELECT isSuspended " +
@@ -306,7 +309,7 @@ public class DataRetriever {
 
 
     public void insertRide(Ride ride) {
-        String sql = "INSERT INTO Rides (IDRides,SourceArea,DestinationArea,RideStatus) Values(?,?,?,?)";
+        String sql = "INSERT OR IGNORE INTO Rides (IDRides,SourceArea,DestinationArea,RideStatus) Values(?,?,?,?)";
         try (Connection conn = this.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             stmt = conn.createStatement();
@@ -337,7 +340,7 @@ public class DataRetriever {
     }
 
     public void insertCarDriverFavouriteArea(CarDriver carDriver, Area area) {
-        String sql = "INSERT INTO CarDriver (DriverID,LicenceNo,Areas) Values(?,?,?)";
+        String sql = "INSERT OR IGNORE INTO CarDriver (DriverID,LicenceNo,Areas) Values(?,?,?)";
         String sql2 = "SELECT IDAccount FROM Accounts where UserName = ?" + ";";
         try (Connection conn = this.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql);
@@ -441,7 +444,7 @@ public class DataRetriever {
 
     public void removeCarDriverFavouriteArea(Driver carDriver, Area area) {
         try (Connection conn = this.connect()) {
-            //TODO query id to remove specific area
+
             String sql = "SELECT IDAccount FROM Accounts WHERE UserName = " + carDriver.account.getUsername() + ";";
             stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
@@ -462,6 +465,7 @@ public class DataRetriever {
         this.RequestDB();
         this.RidesDB();
         this.UserAccountsDB();
+        this.adminAccountsDB();
         this.offersDB();
     }
 
@@ -536,7 +540,7 @@ public class DataRetriever {
     }
 
     public void makeCarRequest(CarRequest carRequest) {
-        String sql = "INSERT INTO Requests (RequestID,DriverID,CustomerID,RideID,driverOffer,isAccepted) VALUES (?,?,?,?,?,?)";
+        String sql = "INSERT OR IGNORE INTO Requests (RequestID,DriverID,CustomerID,RideID,driverOffer,isAccepted) VALUES (?,?,?,?,?,?)";
         try (Connection conn = this.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             stmt = conn.createStatement();
@@ -628,4 +632,66 @@ public class DataRetriever {
             System.exit(0);
         }
     }
+
+    public Double getDriverOffer(User user) {
+        return 1.0;
+    }
+
+    public Boolean adminLogin(Login acc) {
+        String sql = "SELECT Password "
+                + " FROM AdminAccounts where UserName = ?";
+        try (Connection conn = this.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+        ) {
+            pstmt.setString(1, acc.username);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.getString("Password").equals(acc.password)) {
+                return true;
+            }
+        } catch (Exception e) {
+            System.out.println("Wrong username or password");
+            System.exit(0);
+            return false;
+        }
+        return false;
+    }
+
+    public void adminAccountsDB() {
+        try {
+            Class.forName("org.sqlite.JDBC");
+            c = DriverManager.getConnection("jdbc:sqlite:soo2Werkab.db");
+            stmt = c.createStatement();
+            String sql = "CREATE IF NOT EXIST TABLE AdminAccounts " +
+                    "(AccountID INTEGER ," +
+                    " UserStatus   TEXT CHECK( UserStatus IN ('Inactive','InRide','Pending','idle') )   NOT NULL DEFAULT 'idle'," +
+                    "FOREIGN KEY(AccountID)  REFERENCES Accounts(IDAccount))";
+            stmt.executeUpdate(sql);
+            stmt.close();
+            c.close();
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        }
+    }
+
+    private void adminAccountRegister(Account a) {
+        String sql = "INSERT OR IGNORE INTO AdminAccounts (IDAccount,UserName,Password,Email,mobileNo,isSuspended,create_time) VALUES (?,?,?,?,?,?,?)";
+        try (Connection conn = this.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery("SELECT max(IDAccount) AS MAX FROM Accounts ;");
+            accountId = rs.getInt("MAX") + 1;
+            pstmt.setInt(1, accountId);
+            pstmt.setString(2, a.getUsername());
+            pstmt.setString(3, a.getPassword());
+            pstmt.setString(4, a.getEmail());
+            pstmt.setString(5, a.getMobileNumber());
+            pstmt.setInt(6, 0);
+            pstmt.executeUpdate();
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        }
+    }
+
 }
