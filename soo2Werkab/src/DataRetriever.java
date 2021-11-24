@@ -390,8 +390,8 @@ public class DataRetriever {
     public ArrayList<Ride> getRidesFromArea(Area area) {
         ArrayList<Ride> rides = new ArrayList<>();
         String sql = "SELECT IDRides,SourceArea,DestinationArea,RideStatus FROM Rides WHERE(" +
-                "SELECT Areas FROM CarDriver WHERE Areas = " + area.toString() +
-                ")";
+                "SELECT Areas FROM CarDriver WHERE Areas LIKE '%" + area.toString() +
+                "%')";
         try (Connection conn = this.connect()) {
             stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sql);

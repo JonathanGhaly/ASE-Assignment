@@ -13,7 +13,7 @@ public class CarDriver extends Driver {
         this.drivingLicenseNumber = drivingLicenseNumber;
     }
 
-    public ArrayList<Ride> listAllRides() { //TODO query rides on favourite area for Driver
+    public ArrayList<Ride> listAllRides() {
         ArrayList<Ride> rides=new ArrayList<>();
         ArrayList<Area> areas = getFavouriteAreas();
         for(Area area : areas){
