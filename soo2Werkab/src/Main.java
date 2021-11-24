@@ -1,10 +1,12 @@
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Main {
     static int choice;
     static boolean isLoggedIn = false,isDriver = false;
+    static CarDriver driver;
     static Scanner in = new Scanner(System.in);
-    static String username,password,email,phoneNo;
+    static String username,password,email,phoneNo,source,dest;
     public static void main(String[] args) {
         System.out.println("Welcome to soo2Werkab");
         System.out.println("1- Login\n2- Register");
@@ -17,6 +19,9 @@ public class Main {
               password=in.next();
               Login l = new Login(username,password);
               isDriver = l.isDriver;
+              if(isDriver){
+                  driver = l.getCarDriver(username);
+              }
               isLoggedIn=true;
               break;
           case 2:
@@ -35,6 +40,7 @@ public class Main {
               switch (choice){
                   case 1:
                       Register r = new Register(acc,false);
+
                       break;
                   case 2:
                        r = new Register(acc,true);
@@ -47,10 +53,31 @@ public class Main {
               break;
       }while(isLoggedIn){
             if(isDriver){
-                System.out.println("I am driver");
-                break;
+                System.out.println("1- Set favorite area\n2- List favorite areas");
+                choice = in.nextInt();
+                switch (choice){
+                    case 1:
+                        System.out.println("Please Enter area to add to favorite");
+                        source = in.next();
+                        Area a= new Area(source);
+                        driver.addFavouriteArea(a);
+                        break;
+                    case 2:
+                        ArrayList<Area> areas = driver.getFavouriteAreas();
+                        for(Area area : areas){
+                            System.out.println(area.areaName);
+                        }
+                        break;
+                }
+
             }else{
-                System.out.println("I amnot a driver");
+                System.out.println("Please enter the source: ");
+                source = in.next();
+                System.out.println("Please enter the destination");
+                dest = in.next();
+                Area src = new Area(source);
+                Area destination = new Area(dest);
+                Ride ride = new Ride(src,destination,username);
                 break;
             }
         }
