@@ -450,14 +450,15 @@ public class DataRetriever {
             pstmt.setString(2,area.toString());
             pstmt.setInt(1,getID(carDriver.account.getUsername()));
             ResultSet rs = pstmt.executeQuery();
-            pstmt.close();
-            stmt.close();
+
             while (rs.next()) {
                 Area Source = new Area(rs.getString("SourceArea"));
                 Area Destination = new Area(rs.getString("DestinationArea"));
                 Ride ride = new Ride(Source, Destination);
                 rides.add(ride);
             }
+            pstmt.close();
+            stmt.close();
             conn.close();
             return rides;
 
@@ -666,9 +667,11 @@ public class DataRetriever {
         return offers;
     }
 
-    public void rateDriver(Driver driver, Integer rate) {
-
-        try (Connection conn = this.connect()) {
+    public void rateDriver(CarDriver driver, Integer rate) {
+        String pstmtSql = "UPDATE DriverAccount SET Rating= ? ,NumOfRatings = ? WHERE DriverID = ?;";
+        try (Connection conn = this.connect();
+             PreparedStatement psmt = conn.prepareStatement(pstmtSql)
+        ) {
             stmt = conn.createStatement();
             String sql = "SELECT DriverID,Rating,NumOfRatings FROM DriverAccount" +
                     " WHERE DriverID = "+getID(driver.account.getUsername()) +";";
@@ -677,9 +680,12 @@ public class DataRetriever {
             Integer numRating = rs.getInt("NumOfRatings") +1;
             Integer avgRate = (rate + rating)/numRating;
 
-            sql = "UPDATE DriverAccount SET Rating= "+avgRate+" ,NumOfRatings = "+numRating+
-                    " WHERE DriverID = "+getID(driver.account.getUsername())+";";
-            stmt.executeQuery(sql);
+//            sql = "UPDATE DriverAccount SET Rating= "+avgRate+" ,NumOfRatings = "+numRating+
+//                    " WHERE DriverID = "+getID(driver.account.getUsername())+";";
+            psmt.setDouble(1,avgRate);
+            psmt.setInt(2,numRating);
+            psmt.setInt(3,getID(driver.account.getUsername()));
+            psmt.executeQuery();
             stmt.close();
             c.close();
         } catch (Exception e) {

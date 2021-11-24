@@ -10,6 +10,7 @@ public class CarRequest {
     Area source, destination;
     CarRequest(User user, Area source, Area destination) {
         ride = new Ride(source, destination);
+        ride.makeRide(source, destination);
         this.client=user;
         isAccepted=false;
         DataRetriever db = DataRetriever.getInstance();
