@@ -1,4 +1,5 @@
 import javax.xml.transform.Result;
+import java.io.File;
 import java.sql.*;
 import java.util.ArrayList;
 
@@ -11,6 +12,8 @@ public class DataRetriever {
     public static DataRetriever getInstance() {
         if (dataRetriever == null) {
             dataRetriever = new DataRetriever();
+            if (!new File("soo2Werkab.db").exists())
+                dataRetriever.Builder();
             return dataRetriever;
         }
         return dataRetriever;
@@ -408,7 +411,7 @@ public class DataRetriever {
     }
 
 
-    public void Builder() {
+     void Builder() {
         this.AccountDB();
         this.driverAccountsDB();
         this.carDriverDB();
@@ -420,5 +423,71 @@ public class DataRetriever {
 
     static int getRating(Driver driver) {
         return 0;
+    }
+
+    public User getUserDB(Integer id) {
+
+        String sql = "select * from UserAccount\nwhere AccountId = " + id + ";";
+        try(Connection conn = this.connect();
+            PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery( sql );
+            accountId = rs.getInt("AccountID");
+            pstmt.setInt(1,accountId);
+            pstmt.executeUpdate();
+        } catch ( Exception e ) {
+            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+            System.exit(0);
+        }
+        return new User();
+    }
+
+    public void changeStateDB(String username, int value) {
+        try {
+            Class.forName("org.sqlite.JDBC");
+            c = DriverManager.getConnection("jdbc:sqlite:soo2Werkab.db");
+            stmt = c.createStatement();
+            String sql = "UPDATE Accounts\n " +
+                    "SET isSuspended = " + value + "\n" +
+                    "WHERE UserName = " + username + ";";
+            stmt.executeUpdate(sql);
+            stmt.close();
+            c.close();
+        } catch ( Exception e ) {
+            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+            System.exit(0);
+        }
+    }
+
+    public void verifyDriverDB(Integer id) {
+        try {
+            Class.forName("org.sqlite.JDBC");
+            c = DriverManager.getConnection("jdbc:sqlite:soo2Werkab.db");
+            stmt = c.createStatement();
+            String sql = "UPDATE DriverAccount\n" +
+                    "SET IsVerified = 1\n" +
+                    "WHERE DriverID = " + id + ";";
+            stmt.executeUpdate(sql);
+            stmt.close();
+            c.close();
+        } catch ( Exception e ) {
+            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+            System.exit(0);
+        }
+    }
+
+    public int getID(String username) {
+        int id = -1;
+        String sql = "SELECT IDAccount FROM Accounts Where UserName = " + username + ";";
+        try (Connection conn = this.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
+            id = rs.getInt( "IDAccount");
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        }
+        return id;
     }
 }

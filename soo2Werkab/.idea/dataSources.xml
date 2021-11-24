@@ -8,5 +8,12 @@
       <jdbc-url>jdbc:sqlite:D:\Codes\ASE-Assignment-1\soo2Werkab\soo2Werkab.db</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
+    <data-source source="LOCAL" name="soo2Werkab [2]" uuid="d53fee5f-9a67-4a60-a60c-9f84884997c3">
+      <driver-ref>sqlite.xerial</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
+      <jdbc-url>jdbc:sqlite:C:\Users\amrmo\OneDrive\Desktop\GitHub\ASE-Assignment-1\soo2Werkab\soo2Werkab.db</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
   </component>
 </project>
