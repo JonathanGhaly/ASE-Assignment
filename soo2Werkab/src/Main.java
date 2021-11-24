@@ -82,7 +82,7 @@ public class Main {
                     admin.suspend(username, 0);
                 }
             } else if (isDriver) {
-                System.out.println("1- Set favorite area\n2- List favorite rides available");
+                System.out.println("1- Set favorite area\n2- List favorite areas\n3- List favorite rides available");
 
                 choice = in.nextInt();
                 switch (choice) {
@@ -120,7 +120,7 @@ public class Main {
                 }
 
             } else {
-                System.out.println("1- To request ride");
+                System.out.println("1- To request ride\n2- To Rate driver");
                 choice = in.nextInt();
                 switch (choice){
                     case 1:{
@@ -145,6 +145,9 @@ public class Main {
                                     choice = in.nextInt();
                                 }
                                 break;
+                            case 2:
+                                int stars = in.nextInt();
+                                user.rateDriver(stars);
                         }
                     }
                 }

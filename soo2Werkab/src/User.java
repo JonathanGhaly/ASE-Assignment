@@ -29,9 +29,10 @@ public class User {
 
     }
 
-    void rateDriver(Integer stars) {
+    void rateDriver(int id,Integer stars) {
 //        currentRequest.rate(stars);
        DataRetriever db = DataRetriever.getInstance();
+        
        db.rateDriver(currentRequest.carDriver,stars);
     }
 

@@ -17,7 +17,7 @@ public class CarDriver extends Driver {
         ArrayList<Ride> rides=new ArrayList<>();
         ArrayList<Area> areas = getFavouriteAreas();
         for(Area area : areas){
-            rides.addAll(db.getRidesFromArea(area));
+            rides.addAll(db.getRidesFromArea(this,area));
         }
 
         return rides;
