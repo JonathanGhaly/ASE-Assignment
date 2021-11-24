@@ -2,7 +2,7 @@ public class Login {
     DataRetriever d = DataRetriever.getInstance();
     String username;
     String password;
-    Boolean isDriver = false, isLoggedin = false;
+    Boolean isDriver = false, isLoggedin = false, isAdmin = false;
 
     CarDriver c;
     User u;
