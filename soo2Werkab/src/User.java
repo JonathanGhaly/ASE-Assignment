@@ -2,6 +2,14 @@ public class User {
     Account account;
     CarRequest currentRequest;
 
+    User(Account account){
+        this.account = account;
+    }
+
+    public User() {
+
+    }
+
     void requestRide(Area source, Area destination) {
         if (currentRequest == null)
             currentRequest = new CarRequest(this, source, destination);
