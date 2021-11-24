@@ -18,7 +18,6 @@ public class Driver {
         System.out.println(request.toString());
         sc = new Scanner(System.in);
         Boolean choice = sc.nextBoolean();
-
         request.responce(choice);
     }
 

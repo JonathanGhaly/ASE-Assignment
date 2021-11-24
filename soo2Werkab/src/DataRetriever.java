@@ -129,7 +129,8 @@ public class DataRetriever {
                     "(DriverID INTEGER ," +
                     "LicenceNo CHAR(50) NOT NULL ," +
                     "Areas CHAR(50) NULL," +
-                    "FOREIGN KEY(DriverID)  REFERENCES DriverAccount(DriverID))";
+                    "FOREIGN KEY(DriverID)  REFERENCES DriverAccount(DriverID)"+
+                    "UNIQUE(DriverID,Areas))";
             stmt.executeUpdate(sql);
             stmt.close();
             c.close();
@@ -236,21 +237,20 @@ public class DataRetriever {
             if (rs.getString("Password").equals(acc.password)) {
                 pstmt2.setString(1, acc.username);
                 rs = pstmt2.executeQuery();
-                if (rs.getInt("isSuspended") == 0){
+                if (rs.getInt("isSuspended") == 0) {
                     acc.isDriver = this.isDriver(acc);
                     return true;
-                }
-                else {
+                } else {
                     System.out.println("The account is suspended");
                     return false;
                 }
             }
+            return false;
         } catch (Exception e) {
             System.out.println("Wrong username or password");
             System.exit(0);
             return false;
         }
-        return false;
     }
 
     Boolean isDriver(Login acc) {
@@ -264,7 +264,7 @@ public class DataRetriever {
         ) {
             pstmt.setString(1, acc.username);
             ResultSet rs = pstmt.executeQuery();
-            pstmt2.setInt(1,rs.getInt("IDAccount"));
+            pstmt2.setInt(1, rs.getInt("IDAccount"));
             ResultSet rs2 = pstmt2.executeQuery();
             int id = rs2.getInt("DriverID");
             return true;
@@ -272,7 +272,6 @@ public class DataRetriever {
             return false;
         }
     }
-
 
 
     public void insertRide(Ride ride) {
@@ -308,11 +307,16 @@ public class DataRetriever {
 
     public void insertCarDriverFavouriteArea(CarDriver carDriver, Area area) {
         String sql = "INSERT INTO CarDriver (DriverID,LicenceNo,Areas) Values(?,?,?)";
+        String sql2 = "SELECT IDAccount FROM Accounts where UserName = ?" + ";";
         try (Connection conn = this.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             PreparedStatement pstmt2 = conn.prepareStatement(sql2)
+        ) {
             stmt = conn.createStatement();
             String username = carDriver.account.getUsername();
-            ResultSet rs = stmt.executeQuery("SELECT IDAcount FROM Account where UserName = " + username + ";");
+            pstmt2.setString(1, username);
+            //   ResultSet rs = stmt.executeQuery("SELECT IDAccount FROM Accounts where UserName = " + username + ";");
+            ResultSet rs = pstmt2.executeQuery();
             int id = rs.getInt("IDAccount");
             pstmt.setInt(1, id);
             pstmt.setString(2, carDriver.drivingLicenseNumber);
@@ -327,7 +331,6 @@ public class DataRetriever {
 
     public ArrayList<Area> getCarDriverFavouriteArea(CarDriver carDriver) {
         ArrayList<Area> areas = new ArrayList<>();
-        String username = carDriver.account.getUsername();
         String sql = "SELECT Areas FROM CarDriver Where LicenceNo = " + carDriver.drivingLicenseNumber + ";";
         try (Connection conn = this.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -341,6 +344,67 @@ public class DataRetriever {
             System.exit(0);
         }
         return areas;
+    }
+
+    public CarDriver getCarDriver(String username) {
+        String sql = "SELECT IDAccount,UserName,Password,Email,mobileNo "
+                + " FROM Accounts where UserName = ?";
+        String sql2 = "SELECT DriverID,LicenceNo,NationalID " +
+                "FROM DriverAccount where DriverID = ?";
+        try (Connection conn = this.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             PreparedStatement pstmt2 = conn.prepareStatement(sql2)
+        ) {
+            pstmt.setString(1, username);
+            ResultSet rs = pstmt.executeQuery();
+            pstmt2.setInt(1, rs.getInt("IDAccount"));
+            ResultSet rs2 = pstmt2.executeQuery();
+            int id = rs2.getInt("DriverID");
+            Account driver = new Account(rs.getString("UserName"), rs.getString("Password"), rs.getString("Email"), rs.getString("mobileNo"));
+            CarDriver ret = new CarDriver(driver, rs2.getString("NationalID"), rs2.getString("LicenceNo"));
+            return ret;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    User getUser(String username) {
+        String sql = "SELECT IDAccount,UserName,Password,Email,mobileNo "
+                + " FROM Accounts where UserName = ?";
+        try (Connection conn = this.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)
+        ) {
+            pstmt.setString(1, username);
+            ResultSet rs = pstmt.executeQuery();
+            Account account = new Account(rs.getString("UserName"), rs.getString("Password"), rs.getString("Email"), rs.getString("mobileNo"));
+            User ret = new User(account);
+            return ret;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public ArrayList<Ride> getRidesFromArea(Area area) {
+        ArrayList<Ride> rides = new ArrayList<>();
+        String sql = "SELECT IDRides,SourceArea,DestinationArea,RideStatus FROM Rides WHERE(" +
+                "SELECT Areas FROM CarDriver WHERE Areas = " + area.toString() +
+                ")";
+        try (Connection conn = this.connect()) {
+            stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
+
+            while (rs.next()) {
+                Area Source = new Area(rs.getString("SourceArea"));
+                Area Destination = new Area(rs.getString("DestinationArea"));
+                Ride ride = new Ride(Source, Destination);
+                rides.add(ride);
+            }
+
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        }
+        return rides;
     }
 
 
