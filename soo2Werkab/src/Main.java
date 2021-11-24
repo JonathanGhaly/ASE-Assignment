@@ -80,7 +80,7 @@ public class Main {
                 dest = in.next();
                 Area src = new Area(source);
                 Area destination = new Area(dest);
-                Ride ride = new Ride(src,destination,username);
+                Ride ride = new Ride(src,destination); //TODO change to Car Request
             }
         }
     }

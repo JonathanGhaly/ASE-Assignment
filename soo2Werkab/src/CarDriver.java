@@ -14,8 +14,9 @@ public class CarDriver extends Driver {
     }
 
     public ArrayList<Ride> listAllRides() { //TODO query rides on favourite area for Driver
-        ArrayList<Ride> rides = new ArrayList<>();
-
+        ArrayList<Ride> rides;
+        ArrayList<Area> areas = getFavouriteAreas();
+        rides = db.getRidesFromAreas(areas);
         return rides;
     }
 
@@ -23,8 +24,8 @@ public class CarDriver extends Driver {
         db.insertCarDriverFavouriteArea(this, area);
     }
 
-    public ArrayList<Area> getFavouriteAreas() { //TODO query favourite areas according to driver
-        ArrayList<Area> areas = new ArrayList<>();
+    public ArrayList<Area> getFavouriteAreas() {
+        ArrayList<Area> areas;
         areas = db.getCarDriverFavouriteArea(this);
         return areas;
     }

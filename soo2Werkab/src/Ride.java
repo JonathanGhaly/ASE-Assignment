@@ -11,7 +11,7 @@
         rideStatus = "Pending";
     }
 
-    public Ride(Area sourceArea, Area destinationArea,String user) {
+    public Ride(Area sourceArea, Area destinationArea) {
         this.sourceArea = sourceArea;
         this.destinationArea = destinationArea;
         this.rideStatus = "Pending";

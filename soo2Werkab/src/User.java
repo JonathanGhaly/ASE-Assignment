@@ -1,7 +1,7 @@
 public class User {
     Account account;
     CarRequest currentRequest;
-
+    String userName;
     void requestRide(Area source, Area destination) {
         if (currentRequest == null)
             currentRequest = new CarRequest(this, source, destination);
