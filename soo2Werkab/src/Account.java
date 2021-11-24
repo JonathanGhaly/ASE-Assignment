@@ -5,6 +5,7 @@ public class Account {
     private String email;
     private String mobileNumber;
     private boolean isSuspended;
+    private DataRetriever db;
 
     private boolean validateMobileNumber(String mobileNumber) {
         if (mobileNumber.length() != 11) return false;
@@ -20,6 +21,7 @@ public class Account {
         this.email = email;
         this.mobileNumber = mobileNumber;
         isSuspended = false;
+        db = DataRetriever.getInstance();
     }
 
     public void setUsername(String username) {
