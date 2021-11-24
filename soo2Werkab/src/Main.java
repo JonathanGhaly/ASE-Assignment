@@ -145,11 +145,15 @@ public class Main {
                                     choice = in.nextInt();
                                 }
                                 break;
-                            case 2:
-                                int stars = in.nextInt();
-                                user.rateDriver(stars);
+
                         }
                     }
+                    case 2:
+                        System.out.println("Please Enter driver username");
+                        String uName = in.next();
+                        System.out.println("Please enter the number of stars");
+                        int stars = in.nextInt();
+                        user.rateDriver(uName,stars);
                 }
 
             }

@@ -29,11 +29,11 @@ public class User {
 
     }
 
-    void rateDriver(int id,Integer stars) {
+    void rateDriver(String driverUserName,Integer stars) {
 //        currentRequest.rate(stars);
        DataRetriever db = DataRetriever.getInstance();
-        
-       db.rateDriver(currentRequest.carDriver,stars);
+       CarDriver driver = db.getCarDriver(driverUserName);
+       db.rateDriver(driver,stars);
     }
 
 //
