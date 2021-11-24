@@ -19,13 +19,13 @@ public class Main {
               System.out.println("Please enter the password: ");
               password = in.next();
               Login l = new Login(username, password);
-              isDriver = l.isDriver;
+              isDriver = l.isDriver();
               if (isDriver) {
                   driver = l.getCarDriver();
               }else{
                   user = l.getUser();
               }
-              isLoggedIn = true;
+              isLoggedIn = l.getIsLoggedin();
               break;
           }
           case 2: {

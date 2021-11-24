@@ -245,12 +245,12 @@ public class DataRetriever {
                     return false;
                 }
             }
+            return false;
         } catch (Exception e) {
             System.out.println("Wrong username or password");
             System.exit(0);
             return false;
         }
-        return false;
     }
 
     Boolean isDriver(Login acc) {
