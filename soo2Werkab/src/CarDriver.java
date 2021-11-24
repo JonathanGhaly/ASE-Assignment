@@ -37,7 +37,7 @@ public class CarDriver extends Driver {
         db.removeCarDriverFavouriteArea(this,area);
     }
 
-    public void sendOffer(Ride ride,Double offer){
+    public void sendOffer(Ride ride,Integer offer){
         db.makeDriverOffer(this,offer,ride);
     }
 }

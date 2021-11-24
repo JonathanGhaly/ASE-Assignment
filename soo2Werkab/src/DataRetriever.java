@@ -12,7 +12,7 @@ public class DataRetriever {
     public static DataRetriever getInstance() {
         if (dataRetriever == null) {
             dataRetriever = new DataRetriever();
-            if (! new File("soo2Werkab.db").exists())
+            if (!new File("soo2Werkab.db").exists())
                 dataRetriever.Builder();
             return dataRetriever;
         }
@@ -110,9 +110,37 @@ public class DataRetriever {
                     "NationalID Char(50) NOT NULL ," +
                     "IsVerified SMALLINT DEFAULT 0," +
                     "IsAccepted SMALLINT DEFAULT 0," +
+                    "Rating INTEGER DEFAULT 0," +
+                    "NumOfRatings INTEGER DEFAULT 0," +
                     " DriverStatus   TEXT CHECK( DriverStatus IN ('Inactive','InRide','Pending','idle') )   NOT NULL DEFAULT 'idle'," +
                     "FOREIGN KEY(DriverID)  REFERENCES Accounts(IDAccount)," +
                     "UNIQUE (LicenceNo,NationalID))";
+            stmt.executeUpdate(sql);
+            stmt.close();
+            c.close();
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        }
+        System.out.println("Opened database successfully");
+    }
+
+    public void offersDB() {
+        try {
+            Class.forName("org.sqlite.JDBC");
+            c = DriverManager.getConnection("jdbc:sqlite:soo2Werkab.db");
+            stmt = c.createStatement();
+            String sql = "CREATE TABLE Offers" +
+                    "(DriverID INTEGER ," +
+                    "DriverName CHAR(50) NOT NULL ," +
+                    "RideID INTEGER NOT NULL ," +
+                    "Rating DOUBLE NOT NULL ," +
+                    "Price INTEGER NOT NULL," +
+                    "FOREIGN KEY(DriverName)  REFERENCES Account(UserName)," +
+                    "FOREIGN KEY(DriverID)  REFERENCES DriverAccount(DriverID)," +
+                    "FOREIGN KEY(RideID)  REFERENCES Requests(RideID)," +
+                    "FOREIGN KEY(Rating)  REFERENCES DriverAccount(Rating)" +
+                    "UNIQUE(DriverID))";
             stmt.executeUpdate(sql);
             stmt.close();
             c.close();
@@ -427,14 +455,14 @@ public class DataRetriever {
     }
 
 
-     void Builder() {
+    void Builder() {
         this.AccountDB();
         this.driverAccountsDB();
         this.carDriverDB();
         this.RequestDB();
         this.RidesDB();
         this.UserAccountsDB();
-
+        this.offersDB();
     }
 
     static int getRating(Driver driver) {
@@ -493,7 +521,7 @@ public class DataRetriever {
     }
 
     public int getID(String username) {
-        int id = - 1;
+        int id = -1;
         String sql = "SELECT IDAccount FROM Accounts Where UserName = " + username + ";";
         try (Connection conn = this.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -541,21 +569,36 @@ public class DataRetriever {
         }
     }
 
-    public void makeDriverOffer(CarDriver cardriver, Double offer, Ride ride) {
-        try (Connection conn = this.connect()) {
-            String sql="UPDATE Requests SET driverOffer = "+offer+",DriverID ="+ getID(cardriver.account.getUsername()) +
-                    " WHERE RideID = "+ride.getRideID()+";";
+    public void makeDriverOffer(CarDriver cardriver, Integer offer, Ride ride) {
+        String sql1 = "INSERT INTO DriverAccount (DriverID,DriverName,RideID,Rating,Price) VALUES (?,?,?,?,?)";
+        try (Connection conn = this.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql1)) {
+            String sql = "SELECT DriverId,RideID,CustomerID FROM Requests WHERE " +
+                    "RideID = " + ride.getRideID() + ";";
             stmt = conn.createStatement();
-            stmt.executeQuery(sql);
+            ResultSet rs = stmt.executeQuery(sql);
+            pstmt.setInt(1,rs.getInt("DriverID"));
+
+            pstmt.setInt(3,rs.getInt("RideID"));
+            pstmt.setDouble(4,rs.getDouble("Rating"));
+            pstmt.setInt(5,offer);
+            pstmt.executeUpdate();
         } catch (Exception e) {
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
             System.exit(0);
         }
     }
 
-    public Double getDriverOffer(User user){
-
-
+    public ArrayList<Offer> getDriverOffer(CarRequest carRequest) {
+        ArrayList<Offer> offers;
+    try(Connection conn = this.connect()){
+        stmt= conn.createStatement();
+        String sql = "SELECT DriverID,Rating,Price";
+        ResultSet rs =stmt.executeQuery(sql);
+    }catch(Exception e) {
+        System.err.println(e.getClass().getName() + ": " + e.getMessage());
+        System.exit(0);
+    }
     }
 
 

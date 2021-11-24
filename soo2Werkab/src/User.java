@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+
 public class User {
     Account account;
     CarRequest currentRequest;
@@ -16,7 +18,8 @@ public class User {
     }
 
     void reviewOffers(){
-
+        DataRetriever db = DataRetriever.getInstance();
+        db.getDriverOffer(this.currentRequest);
     }
 
 //    void rateDriver(int stars) {
