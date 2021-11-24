@@ -1,4 +1,4 @@
-    public class Ride {
+public class Ride {
     private Area sourceArea, destinationArea;
     private String rideStatus;
     int rideID;
@@ -20,7 +20,7 @@
 
     public void setRideStatus(String status) {
         this.rideStatus = status;
-        db.updateRideStatus(this,status);
+        db.updateRideStatus(this, status);
     }
 
     public void setRideID(int rideID) {

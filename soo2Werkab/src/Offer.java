@@ -9,4 +9,11 @@ public class Offer {
         this.offerPrice = offerPrice;
         this.driver = driver;
     }
+    @Override
+    public String toString(){
+        return this.driver.account.getUsername();
+    }
+    public double getOfferPrice(){
+        return this.offerPrice;
+    }
 }
