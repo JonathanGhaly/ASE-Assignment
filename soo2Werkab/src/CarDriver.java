@@ -14,9 +14,12 @@ public class CarDriver extends Driver {
     }
 
     public ArrayList<Ride> listAllRides() { //TODO query rides on favourite area for Driver
-        ArrayList<Ride> rides;
+        ArrayList<Ride> rides=new ArrayList<>();
         ArrayList<Area> areas = getFavouriteAreas();
-        rides = db.getRidesFromAreas(areas);
+        for(Area area : areas){
+            rides.addAll(db.getRidesFromArea(area));
+        }
+
         return rides;
     }
 
