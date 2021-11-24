@@ -12,45 +12,47 @@ public class Main {
         System.out.println("1- Login\n2- Register");
         choice = in.nextInt();
       switch (choice){
-          case 1:
+          case 1: {
               System.out.println("Please enter username: ");
-              username=in.next();
+              username = in.next();
               System.out.println("Please enter the password: ");
-              password=in.next();
-              Login l = new Login(username,password);
+              password = in.next();
+              Login l = new Login(username, password);
               isDriver = l.isDriver;
-              if(isDriver){
+              if (isDriver) {
                   driver = l.getCarDriver(username);
               }
-              isLoggedIn=true;
+              isLoggedIn = true;
               break;
-          case 2:
+          }
+          case 2: {
               System.out.println("Please enter username: ");
-              username=in.next();
+              username = in.next();
               System.out.println("Please enter the password: ");
-              password=in.next();
+              password = in.next();
               System.out.println("Please enter Email (Leave blank if there is no email): ");
               in.skip("\n");
-              email= in.nextLine();
+              email = in.nextLine();
               System.out.println("Please enter the phone number: ");
-              phoneNo=in.next();
-              Account acc = new Account(username,password,email,phoneNo);
+              phoneNo = in.next();
+              Account acc = new Account(username, password, email, phoneNo);
               System.out.println("1- To register as user\n2- To register as driver");
               choice = in.nextInt();
-              switch (choice){
+              switch (choice) {
                   case 1:
-                      Register r = new Register(acc,false);
-
+                      Register r = new Register(acc, false);
                       break;
                   case 2:
-                       r = new Register(acc,true);
-                       break;
+                      r = new Register(acc, true);
+                      isDriver=true;
+                      break;
               }
-              isLoggedIn=true;
-              password="";
-              email="";
-              phoneNo="";
+              isLoggedIn = true;
+              password = "";
+              email = "";
+              phoneNo = "";
               break;
+          }
       }while(isLoggedIn){
             if(isDriver){
                 System.out.println("1- Set favorite area\n2- List favorite areas");
@@ -58,7 +60,8 @@ public class Main {
                 switch (choice){
                     case 1:
                         System.out.println("Please Enter area to add to favorite");
-                        source = in.next();
+                        in.skip("\n");
+                        source = in.nextLine();
                         Area a= new Area(source);
                         driver.addFavouriteArea(a);
                         break;
@@ -78,7 +81,6 @@ public class Main {
                 Area src = new Area(source);
                 Area destination = new Area(dest);
                 Ride ride = new Ride(src,destination,username);
-                break;
             }
         }
     }
