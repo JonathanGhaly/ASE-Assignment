@@ -1,5 +1,8 @@
 import javax.xml.transform.Result;
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.sql.*;
 import java.util.ArrayList;
 
@@ -8,13 +11,14 @@ public class DataRetriever {
     Statement stmt;
     static DataRetriever dataRetriever;
     int accountId;
+    boolean isBuilt = false;
 
     public static DataRetriever getInstance() {
         if (dataRetriever == null) {
             dataRetriever = new DataRetriever();
-            if (!new File("soo2Werkab.db").exists())
-                dataRetriever.Builder();
-            return dataRetriever;
+            dataRetriever.Builder();
+            dataRetriever.adminAccountRegister(new Account("admin", "admin", "null", "null"));
+            dataRetriever.isBuilt = true;
         }
         return dataRetriever;
     }
@@ -32,7 +36,6 @@ public class DataRetriever {
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
             System.exit(0);
         }
-        System.out.println("Opened database successfully");
         return c;
     }
 
@@ -41,7 +44,7 @@ public class DataRetriever {
             Class.forName("org.sqlite.JDBC");
             c = DriverManager.getConnection("jdbc:sqlite:soo2Werkab.db");
             stmt = c.createStatement();
-            String sql = "CREATE TABLE Accounts " +
+            String sql = "CREATE TABLE IF NOT EXISTS Accounts " +
                     "(IDAccount INTEGER PRIMARY KEY     NOT NULL," +
                     " UserName       CHAR(50)    NOT NULL  , " +
                     " Password       CHAR(50)         NOT NULL, " +
@@ -57,7 +60,6 @@ public class DataRetriever {
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
             System.exit(0);
         }
-        System.out.println("Opened database successfully");
     }
 
     public void RidesDB() {
@@ -65,7 +67,7 @@ public class DataRetriever {
             Class.forName("org.sqlite.JDBC");
             c = DriverManager.getConnection("jdbc:sqlite:soo2Werkab.db");
             stmt = c.createStatement();
-            String sql = "CREATE TABLE Rides " +
+            String sql = "CREATE TABLE IF NOT EXISTS Rides " +
                     "(IDRides INTEGER PRIMARY KEY     NOT NULL," +
                     " SourceArea       CHAR(50)    NOT NULL, " +
                     " DestinationArea  CHAR(50)         NOT NULL, " +
@@ -77,7 +79,6 @@ public class DataRetriever {
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
             System.exit(0);
         }
-        System.out.println("Opened database successfully");
     }
 
     public void UserAccountsDB() {
@@ -85,7 +86,7 @@ public class DataRetriever {
             Class.forName("org.sqlite.JDBC");
             c = DriverManager.getConnection("jdbc:sqlite:soo2Werkab.db");
             stmt = c.createStatement();
-            String sql = "CREATE TABLE UserAccounts " +
+            String sql = "CREATE TABLE IF NOT EXISTS UserAccounts " +
                     "(AccountID INTEGER ," +
                     " UserStatus   TEXT CHECK( UserStatus IN ('Inactive','InRide','Pending','idle') )   NOT NULL DEFAULT 'idle'," +
                     "FOREIGN KEY(AccountID)  REFERENCES Accounts(IDAccount))";
@@ -96,7 +97,6 @@ public class DataRetriever {
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
             System.exit(0);
         }
-        System.out.println("Opened database successfully");
     }
 
     public void driverAccountsDB() {
@@ -104,7 +104,7 @@ public class DataRetriever {
             Class.forName("org.sqlite.JDBC");
             c = DriverManager.getConnection("jdbc:sqlite:soo2Werkab.db");
             stmt = c.createStatement();
-            String sql = "CREATE TABLE DriverAccount " +
+            String sql = "CREATE TABLE IF NOT EXISTS DriverAccount " +
                     "(DriverID INTEGER ," +
                     "LicenceNo CHAR(50) NOT NULL ," +
                     "NationalID Char(50) NOT NULL ," +
@@ -120,7 +120,6 @@ public class DataRetriever {
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
             System.exit(0);
         }
-        System.out.println("Opened database successfully");
     }
 
     public void carDriverDB() {
@@ -128,7 +127,7 @@ public class DataRetriever {
             Class.forName("org.sqlite.JDBC");
             c = DriverManager.getConnection("jdbc:sqlite:soo2Werkab.db");
             stmt = c.createStatement();
-            String sql = "CREATE TABLE CarDriver" +
+            String sql = "CREATE TABLE IF NOT EXISTS CarDriver" +
                     "(DriverID INTEGER ," +
                     "LicenceNo CHAR(50) NOT NULL ," +
                     "Areas CHAR(50) NULL," +
@@ -140,7 +139,6 @@ public class DataRetriever {
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
             System.exit(0);
         }
-        System.out.println("Opened database successfully");
     }
 
     public void RequestDB() {
@@ -148,7 +146,7 @@ public class DataRetriever {
             Class.forName("org.sqlite.JDBC");
             c = DriverManager.getConnection("jdbc:sqlite:soo2Werkab.db");
             stmt = c.createStatement();
-            String sql = "CREATE TABLE Requests" +
+            String sql = "CREATE TABLE IF NOT EXISTS Requests" +
                     "(RequestID INTEGER PRIMARY KEY NOT NULL ," +
                     "DriverID INTEGER ," +
                     "CustomerID INTEGER ," +
@@ -165,7 +163,6 @@ public class DataRetriever {
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
             System.exit(0);
         }
-        System.out.println("Opened database successfully");
     }
 
     private void AccountRegister(Account a) {
@@ -226,6 +223,9 @@ public class DataRetriever {
     }
 
     public Boolean Login(Login acc) {
+        if (adminLogin(acc)) {
+            return true;
+        }
         String sql = "SELECT Password "
                 + " FROM Accounts where UserName = ?";
         String sql2 = "SELECT isSuspended " +
@@ -354,8 +354,11 @@ public class DataRetriever {
         this.RequestDB();
         this.RidesDB();
         this.UserAccountsDB();
+        this.adminAccountDB();
 
     }
+
+
 
     static int getRating(Driver driver) {
         return 0;
@@ -426,4 +429,67 @@ public class DataRetriever {
         }
         return id;
     }
+
+    private void adminAccountRegister(Account account) {
+        String sql = "INSERT OR IGNORE INTO AdminAccounts (IDAccount,UserName,Password,Email,mobileNo,isSuspended,create_time) VALUES (?,?,?,?,?,?,?)";
+        try (Connection conn = this.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery("SELECT max(IDAccount) AS MAX FROM Accounts ;");
+            accountId = rs.getInt("MAX") + 1;
+            pstmt.setInt(1, accountId);
+            pstmt.setString(2, account.getUsername());
+            pstmt.setString(3, account.getPassword());
+            pstmt.setString(4, account.getEmail());
+            pstmt.setString(5, account.getMobileNumber());
+            pstmt.setInt(6, 0);
+            pstmt.executeUpdate();
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        }
+        System.out.println("Records created successfully");
+    }
+
+    public void adminAccountDB() {
+        try {
+            Class.forName("org.sqlite.JDBC");
+            c = DriverManager.getConnection("jdbc:sqlite:soo2Werkab.db");
+            stmt = c.createStatement();
+            String sql = "CREATE TABLE IF NOT EXISTS AdminAccounts " +
+                    "(IDAccount INTEGER PRIMARY KEY     NOT NULL," +
+                    " UserName       CHAR(50)    NOT NULL  , " +
+                    " Password       CHAR(50)         NOT NULL, " +
+                    " Email          CHAR(50)  NULL , " +
+                    " mobileNo         CHAR(11) NOT NULL ," +
+                    "isSuspended SMALLINT ," +
+                    "create_time TEXT NULL ," +
+                    "UNIQUE(UserName))";
+            stmt.executeUpdate(sql);
+            stmt.close();
+            c.close();
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        }
+    }
+
+    public Boolean adminLogin(Login acc) {
+        String sql = "SELECT Password "
+                + " FROM AdminAccounts where UserName = ?";
+        try (Connection conn = this.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+        ) {
+            pstmt.setString(1, acc.username);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.getString("Password").equals(acc.password)) {
+                System.out.println("Logged in as admin");
+                return true;
+            }
+        } catch (Exception e) {
+            return false;
+        }
+        return false;
+    }
+
 }

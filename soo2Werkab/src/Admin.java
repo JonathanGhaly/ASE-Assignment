@@ -2,9 +2,10 @@ public class Admin {
 
 
     DataRetriever dataRetriever = DataRetriever.getInstance();
+    Account account;
 
-    public Admin() {
-
+    public Admin(String username, String password, String email, String mobileNumber) {
+        account = new Account(username, password, email, mobileNumber);
     }
 
     public void suspend(Account account, int type) {

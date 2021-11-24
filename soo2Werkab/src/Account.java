@@ -14,7 +14,7 @@ public class Account {
         return true;
     }
 
-    Account(String username, String password, String email, String mobileNumber) {
+    public Account(String username, String password, String email, String mobileNumber) {
         this.username = username;
         this.password = password;
         this.email = email;
