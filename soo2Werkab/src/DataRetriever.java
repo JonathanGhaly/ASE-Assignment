@@ -129,7 +129,7 @@ public class DataRetriever {
             Class.forName("org.sqlite.JDBC");
             c = DriverManager.getConnection("jdbc:sqlite:soo2Werkab.db");
             stmt = c.createStatement();
-            String sql = "CREATE TABLE  IF NOT EXISTS Offers" +
+            String sql = "CREATE TABLE IF NOT EXISTS Offers " +
                     "(DriverID INTEGER ," +
                     "DriverName CHAR(50) NOT NULL ," +
                     "RideID INTEGER NOT NULL ," +
@@ -138,7 +138,7 @@ public class DataRetriever {
                     "FOREIGN KEY(DriverName)  REFERENCES Account(UserName)," +
                     "FOREIGN KEY(DriverID)  REFERENCES DriverAccount(DriverID)," +
                     "FOREIGN KEY(RideID)  REFERENCES Requests(RideID)," +
-                    "FOREIGN KEY(Rating)  REFERENCES DriverAccount(Rating)" +
+                    "FOREIGN KEY(Rating)  REFERENCES DriverAccount(Rating)," +
                     "UNIQUE(DriverID))";
             stmt.executeUpdate(sql);
             stmt.close();
@@ -661,7 +661,7 @@ public class DataRetriever {
             Class.forName("org.sqlite.JDBC");
             c = DriverManager.getConnection("jdbc:sqlite:soo2Werkab.db");
             stmt = c.createStatement();
-            String sql = "CREATE IF NOT EXIST TABLE AdminAccounts " +
+            String sql = "CREATE TABLE IF NOT EXISTS AdminAccounts " +
                     "(AccountID INTEGER ," +
                     " UserStatus   TEXT CHECK( UserStatus IN ('Inactive','InRide','Pending','idle') )   NOT NULL DEFAULT 'idle'," +
                     "FOREIGN KEY(AccountID)  REFERENCES Accounts(IDAccount))";
