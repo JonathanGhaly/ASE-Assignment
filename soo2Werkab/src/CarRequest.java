@@ -40,9 +40,9 @@ public class CarRequest {
         return 0.0;
     }
 
-    void rate(int stars){
-
-    }
+//    void rate(int stars){
+//
+//    }
 
     void responce( Boolean response){
 

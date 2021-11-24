@@ -17,15 +17,24 @@ public class User {
             currentRequest = new CarRequest(this, source, destination);
     }
 
-    void reviewOffers(){
+    ArrayList<Offer> getOffers(){
         DataRetriever db = DataRetriever.getInstance();
-        db.getDriverOffer(this.currentRequest);
+        return db.getDriverOffer(this.currentRequest);
+    }
+
+    void acceptOffer(){
+
+    }
+    void rejectOffer(){
 
     }
 
-//    void rateDriver(int stars) {
+    void rateDriver(Integer stars) {
 //        currentRequest.rate(stars);
-//    }
+       DataRetriever db = DataRetriever.getInstance();
+       db.rateDriver(currentRequest.carDriver,stars);
+    }
+
 //
 //    String getDriverRating() {
 //        if (currentRequest != null)

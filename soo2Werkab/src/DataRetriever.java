@@ -577,11 +577,11 @@ public class DataRetriever {
                     "RideID = " + ride.getRideID() + ";";
             stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
-            pstmt.setInt(1,rs.getInt("DriverID"));
-            pstmt.setString(2,cardriver.account.getUsername());
-            pstmt.setInt(3,rs.getInt("RideID"));
-            pstmt.setDouble(4,cardriver.Rating);
-            pstmt.setInt(5,offer);
+            pstmt.setInt(1, rs.getInt("DriverID"));
+            pstmt.setString(2, cardriver.account.getUsername());
+            pstmt.setInt(3, rs.getInt("RideID"));
+            pstmt.setDouble(4, cardriver.Rating);
+            pstmt.setInt(5, offer);
             pstmt.executeUpdate();
         } catch (Exception e) {
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
@@ -590,24 +590,42 @@ public class DataRetriever {
     }
 
     public ArrayList<Offer> getDriverOffer(CarRequest carRequest) {
-        ArrayList<Offer> offers=new ArrayList<>();
-    try(Connection conn = this.connect()){
-        stmt= conn.createStatement();
-        String sql = "SELECT DriverID,DriverName,Rating,Price FROM Offers " +
-                "Where RideID = "+ carRequest.ride.getRideID()+";";
-        ResultSet rs =stmt.executeQuery(sql);
-        while (rs.next()){
-            Integer price = rs.getInt("Price");
-            Offer offer = new Offer(price,carRequest.carDriver);
-            offers.add(offer);
+        ArrayList<Offer> offers = new ArrayList<>();
+        try (Connection conn = this.connect()) {
+            stmt = conn.createStatement();
+            String sql = "SELECT DriverID,DriverName,Rating,Price FROM Offers " +
+                    "Where RideID = " + carRequest.ride.getRideID() + ";";
+            ResultSet rs = stmt.executeQuery(sql);
+            while (rs.next()) {
+                Integer price = rs.getInt("Price");
+                Offer offer = new Offer(price, carRequest.carDriver);
+                offers.add(offer);
+            }
+
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
         }
-
-    }catch(Exception e) {
-        System.err.println(e.getClass().getName() + ": " + e.getMessage());
-        System.exit(0);
-    }
-    return offers;
+        return offers;
     }
 
+    public void rateDriver(Driver driver, Integer rate) {
 
+        try (Connection conn = this.connect()) {
+            stmt = conn.createStatement();
+            String sql = "SELECT DriverID,Rating,NumOfRatings FROM DriverAccount" +
+                    " WHERE DriverID = "+getID(driver.account.getUsername()) +";";
+            ResultSet rs=stmt.executeQuery(sql);
+            Integer rating = rs.getInt("Rating");
+            Integer numRating = rs.getInt("NumOfRatings") +1;
+            Integer avgRate = (rate + rating)/numRating;
+
+            sql = "UPDATE DriverAccount SET Rating= "+avgRate+" ,NumOfRatings = "+numRating+
+                    " WHERE DriverID = "+getID(driver.account.getUsername())+";";
+            stmt.executeQuery(sql);
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        }
+    }
 }
