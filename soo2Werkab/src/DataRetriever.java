@@ -369,6 +369,21 @@ public class DataRetriever {
             return null;
         }
     }
+    User getUser(String username){
+        String sql = "SELECT IDAccount,UserName,Password,Email,mobileNo "
+                + " FROM Accounts where UserName = ?";
+        try (Connection conn = this.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)
+        ) {
+            pstmt.setString(1,username);
+            ResultSet rs = pstmt.executeQuery();
+            Account account = new Account(rs.getString("UserName"),rs.getString("Password"),rs.getString("Email"),rs.getString("mobileNo"));
+            User ret = new User(account);
+            return ret;
+        } catch (Exception e) {
+            return null;
+        }
+    }
     public void Builder() {
         this.AccountDB();
         this.driverAccountsDB();

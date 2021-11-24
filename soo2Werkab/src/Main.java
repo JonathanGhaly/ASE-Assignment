@@ -4,7 +4,8 @@ import java.util.Scanner;
 public class Main {
     static int choice;
     static boolean isLoggedIn = false,isDriver = false;
-    static CarDriver driver;
+    static CarDriver driver = null;
+    static User user = null;
     static Scanner in = new Scanner(System.in);
     static String username,password,email,phoneNo,source,dest;
     public static void main(String[] args) {
@@ -20,7 +21,9 @@ public class Main {
               Login l = new Login(username, password);
               isDriver = l.isDriver;
               if (isDriver) {
-                  driver = l.getCarDriver(username);
+                  driver = l.getCarDriver();
+              }else{
+                  user = l.getUser();
               }
               isLoggedIn = true;
               break;
