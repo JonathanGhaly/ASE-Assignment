@@ -244,12 +244,12 @@ public class DataRetriever {
                     return false;
                 }
             }
+            return false;
         } catch (Exception e) {
             System.out.println("Wrong username or password");
             System.exit(0);
             return false;
         }
-        return false;
     }
 
     Boolean isDriver(Login acc) {
@@ -263,7 +263,7 @@ public class DataRetriever {
         ) {
             pstmt.setString(1, acc.username);
             ResultSet rs = pstmt.executeQuery();
-            pstmt2.setInt(1, rs.getInt("IDAccount"));
+            pstmt2.setInt(1,rs.getInt("IDAccount"));
             ResultSet rs2 = pstmt2.executeQuery();
             int id = rs2.getInt("DriverID");
             return true;
@@ -306,15 +306,15 @@ public class DataRetriever {
 
     public void insertCarDriverFavouriteArea(CarDriver carDriver, Area area) {
         String sql = "INSERT INTO CarDriver (DriverID,LicenceNo,Areas) Values(?,?,?)";
-        String sql2 = "SELECT IDAccount FROM Accounts where UserName = ?" + ";";
+        String sql2= "SELECT IDAccount FROM Accounts where UserName = ?"+";";
         try (Connection conn = this.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql);
              PreparedStatement pstmt2 = conn.prepareStatement(sql2)
         ) {
             stmt = conn.createStatement();
             String username = carDriver.account.getUsername();
-            pstmt2.setString(1, username);
-            //   ResultSet rs = stmt.executeQuery("SELECT IDAccount FROM Accounts where UserName = " + username + ";");
+            pstmt2.setString(1,username);
+         //   ResultSet rs = stmt.executeQuery("SELECT IDAccount FROM Accounts where UserName = " + username + ";");
             ResultSet rs = pstmt2.executeQuery();
             int id = rs.getInt("IDAccount");
             pstmt.setInt(1, id);
@@ -345,7 +345,7 @@ public class DataRetriever {
         return areas;
     }
 
-    public CarDriver getCarDriver(String username) {
+    public CarDriver getCarDriver(String username){
         String sql = "SELECT IDAccount,UserName,Password,Email,mobileNo "
                 + " FROM Accounts where UserName = ?";
         String sql2 = "SELECT DriverID,LicenceNo,NationalID " +
@@ -354,13 +354,28 @@ public class DataRetriever {
              PreparedStatement pstmt = conn.prepareStatement(sql);
              PreparedStatement pstmt2 = conn.prepareStatement(sql2)
         ) {
-            pstmt.setString(1, username);
+            pstmt.setString(1,username);
             ResultSet rs = pstmt.executeQuery();
-            pstmt2.setInt(1, rs.getInt("IDAccount"));
+            pstmt2.setInt(1,rs.getInt("IDAccount"));
             ResultSet rs2 = pstmt2.executeQuery();
             int id = rs2.getInt("DriverID");
-            Account driver = new Account(rs.getString("UserName"), rs.getString("Password"), rs.getString("Email"), rs.getString("mobileNo"));
-            CarDriver ret = new CarDriver(driver, rs2.getString("NationalID"), rs2.getString("LicenceNo"));
+            Account driver = new Account(rs.getString("UserName"),rs.getString("Password"),rs.getString("Email"),rs.getString("mobileNo"));
+            CarDriver ret = new CarDriver(driver,rs2.getString("NationalID"),rs2.getString("LicenceNo"));
+            return ret;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+    User getUser(String username){
+        String sql = "SELECT IDAccount,UserName,Password,Email,mobileNo "
+                + " FROM Accounts where UserName = ?";
+        try (Connection conn = this.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)
+        ) {
+            pstmt.setString(1,username);
+            ResultSet rs = pstmt.executeQuery();
+            Account account = new Account(rs.getString("UserName"),rs.getString("Password"),rs.getString("Email"),rs.getString("mobileNo"));
+            User ret = new User(account);
             return ret;
         } catch (Exception e) {
             return null;
