@@ -371,6 +371,8 @@ public class DataRetriever {
         }
     }
 
+
+
     User getUser(String username) {
         String sql = "SELECT IDAccount,UserName,Password,Email,mobileNo "
                 + " FROM Accounts where UserName = ?";
@@ -408,6 +410,21 @@ public class DataRetriever {
             System.exit(0);
         }
         return rides;
+    }
+
+    public void removeCarDriverFavouriteArea(CarDriver carDriver,Area area){
+        try(Connection conn = this.connect()){
+            //TODO query id to remove specific area
+            String sql= "SELECT IDAccount FROM Accounts WHERE UserName = "+carDriver.account.getUsername()+";";
+            stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
+            int id = rs.getInt("IDAccount");
+            sql = "DELETE FROM CarDriver WHERE DriverID = "+id+" AND Areas = "+area.toString()+";";
+            stmt.executeQuery(sql);
+        }catch (Exception e){
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        }
     }
 
 
