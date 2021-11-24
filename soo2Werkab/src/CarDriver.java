@@ -1,7 +1,7 @@
 import java.util.ArrayList;
 
 public class CarDriver extends Driver {
-
+    Double Rating;
 
     DataRetriever db = DataRetriever.getInstance();
     CarDriver(){

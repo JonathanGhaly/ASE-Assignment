@@ -20,6 +20,7 @@ public class User {
     void reviewOffers(){
         DataRetriever db = DataRetriever.getInstance();
         db.getDriverOffer(this.currentRequest);
+
     }
 
 //    void rateDriver(int stars) {

@@ -570,7 +570,7 @@ public class DataRetriever {
     }
 
     public void makeDriverOffer(CarDriver cardriver, Integer offer, Ride ride) {
-        String sql1 = "INSERT INTO DriverAccount (DriverID,DriverName,RideID,Rating,Price) VALUES (?,?,?,?,?)";
+        String sql1 = "INSERT INTO Offers (DriverID,DriverName,RideID,Rating,Price) VALUES (?,?,?,?,?)";
         try (Connection conn = this.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql1)) {
             String sql = "SELECT DriverId,RideID,CustomerID FROM Requests WHERE " +
@@ -578,9 +578,9 @@ public class DataRetriever {
             stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
             pstmt.setInt(1,rs.getInt("DriverID"));
-
+            pstmt.setString(2,cardriver.account.getUsername());
             pstmt.setInt(3,rs.getInt("RideID"));
-            pstmt.setDouble(4,rs.getDouble("Rating"));
+            pstmt.setDouble(4,cardriver.Rating);
             pstmt.setInt(5,offer);
             pstmt.executeUpdate();
         } catch (Exception e) {
@@ -590,15 +590,23 @@ public class DataRetriever {
     }
 
     public ArrayList<Offer> getDriverOffer(CarRequest carRequest) {
-        ArrayList<Offer> offers;
+        ArrayList<Offer> offers=new ArrayList<>();
     try(Connection conn = this.connect()){
         stmt= conn.createStatement();
-        String sql = "SELECT DriverID,Rating,Price";
+        String sql = "SELECT DriverID,DriverName,Rating,Price FROM Offers " +
+                "Where RideID = "+ carRequest.ride.getRideID()+";";
         ResultSet rs =stmt.executeQuery(sql);
+        while (rs.next()){
+            Integer price = rs.getInt("Price");
+            Offer offer = new Offer(price,carRequest.carDriver);
+            offers.add(offer);
+        }
+
     }catch(Exception e) {
         System.err.println(e.getClass().getName() + ": " + e.getMessage());
         System.exit(0);
     }
+    return offers;
     }
 
 

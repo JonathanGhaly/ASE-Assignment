@@ -1,11 +1,11 @@
 public class Offer {
-    Double offerPrice;
+    Integer offerPrice;
     Driver driver;
 
     Offer() {
     }
 
-    Offer(Double offerPrice, Driver driver) {
+    Offer(Integer offerPrice, Driver driver) {
         this.offerPrice = offerPrice;
         this.driver = driver;
     }
