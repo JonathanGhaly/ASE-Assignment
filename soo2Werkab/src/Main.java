@@ -1,3 +1,4 @@
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -54,6 +55,8 @@ public class Main {
                         r = new Register(acc, true);
                         isDriver = true;
                         break;
+                    default:
+                        System.out.println("Wrong command");
                 }
                 isLoggedIn = true;
                 password = "";
@@ -80,9 +83,14 @@ public class Main {
                     case 3:
                     System.out.println("Enter username");
                     admin.suspend(username, 0);
+                    break;
+                    case -1:
+                        return;
+                    default:
+                        System.out.println("Wrong command");
                 }
             } else if (isDriver) {
-                System.out.println("1- Set favorite area\n2- List favorite areas\n3- List favorite rides available");
+                System.out.println("1- Set favorite area\n2- List favorite areas\n3- List favorite rides available\n4- Show my rating");
 
                 choice = in.nextInt();
                 switch (choice) {
@@ -105,18 +113,29 @@ public class Main {
                             for(Ride ride : rides){
                                 System.out.println(ride.getRideID() +" from "+ride.getSourceArea().toString()+" to "+ride.getDestinationArea().toString());
                             }
-                            System.out.println("Enter 0 to refresh list or -1 to exit or Enter ride ID to make offer");
-                            choice = in.nextInt();
-                            if(choice > 0){
+                            System.out.println("Enter 0 to refresh list or Enter ride ID to make offer");
+                            int driverOffer = in.nextInt();
+                            if(driverOffer > 0){
                                 for(Ride ride : rides){
-                                    if(ride.getRideID() == choice){
+                                    if(ride.getRideID() == driverOffer){
+                                        System.out.println("Please enter the price");
                                         Integer offerPrice = in.nextInt();
                                         Offer offer = new Offer(offerPrice,driver);
                                         driver.sendOffer(ride,offerPrice);
                                     }
                                 }
                             }
+                            System.out.println("Enter 0 to refresh list or -1 to exit");
+                            choice = in.nextInt();
                         }
+                        break;
+                    case 4:
+                        System.out.println("Your rate is: " + driver.rate());
+                        break;
+                    case -1:
+                        return;
+                    default:
+                        System.out.println("Wrong command");
                 }
 
             } else {
@@ -145,7 +164,8 @@ public class Main {
                                     choice = in.nextInt();
                                 }
                                 break;
-
+                            default:
+                                System.out.println("Wrong command");
                         }
                     }
                     case 2:
@@ -154,6 +174,12 @@ public class Main {
                         System.out.println("Please enter the number of stars");
                         int stars = in.nextInt();
                         user.rateDriver(uName,stars);
+                        break;
+                    case -1:
+                        return;
+
+                    default:
+                        System.out.println("Wrong username");
                 }
 
             }

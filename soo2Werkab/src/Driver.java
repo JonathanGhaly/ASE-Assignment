@@ -7,10 +7,10 @@ public class Driver {
     boolean isVerified;
     boolean isAccepted;
     Scanner sc;
+    DataRetriever d = DataRetriever.getInstance();
 
-
-    String showRating() {
-        return "Your current rating is: " + DataRetriever.getRating(this);
+    int rate() {
+        return d.getRating(d.getID(account.getUsername()));
     }
 
     void notifyOfRequest(CarRequest request) {

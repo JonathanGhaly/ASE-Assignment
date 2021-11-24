@@ -455,10 +455,9 @@ public class DataRetriever {
                 Area Source = new Area(rs.getString("SourceArea"));
                 Area Destination = new Area(rs.getString("DestinationArea"));
                 Ride ride = new Ride(Source, Destination);
+                ride.setRideID(rs.getInt("IDRides"));
                 rides.add(ride);
             }
-            pstmt.close();
-            stmt.close();
             conn.close();
             return rides;
 
@@ -500,13 +499,28 @@ public class DataRetriever {
         this.offersDB();
     }
 
-    static int getRating(Driver driver) {
-        return 0;
+    int getRating(int driverID) {
+        String sql = "select Rating from DriverAccount\nwhere DriverID = ?;";
+        int rate = 0;
+        try (Connection conn = this.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, driverID);
+            ResultSet rs = pstmt.executeQuery();
+            rate = rs.getInt("Rating");
+            pstmt.close();
+            pstmt.close();
+            c.close();
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        }
+        return rate;
+
     }
 
     public User getUserDB(Integer id) {
 
-        String sql = "select * from UserAccount\nwhere AccountId = " + id + ";";
+        String sql = "select Rating from DriverAccount\nwhere DriverId = " + id + ";";
         try (Connection conn = this.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             stmt = conn.createStatement();
@@ -626,15 +640,17 @@ public class DataRetriever {
 
     public void makeDriverOffer(CarDriver cardriver, Integer offer, Ride ride) {
         String sql1 = "INSERT INTO Offers (DriverID,DriverName,RideID,Rating,Price) VALUES (?,?,?,?,?)";
+        String sql = "SELECT DriverId,RideID,CustomerID FROM Requests WHERE " +
+                "RideID = ?;";
         try (Connection conn = this.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql1)) {
-            String sql = "SELECT DriverId,RideID,CustomerID FROM Requests WHERE " +
-                    "RideID = " + ride.getRideID() + ";";
-            stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(sql);
-            pstmt.setInt(1, rs.getInt("DriverID"));
+             PreparedStatement pstmt = conn.prepareStatement(sql1);
+             PreparedStatement pstmt2 = conn.prepareStatement(sql);
+        ) {
+            pstmt2.setInt(1,ride.getRideID());
+            ResultSet rs2 = pstmt2.executeQuery();
+            pstmt.setInt(1, rs2.getInt("DriverID"));
             pstmt.setString(2, cardriver.account.getUsername());
-            pstmt.setInt(3, rs.getInt("RideID"));
+            pstmt.setInt(3, rs2.getInt("RideID"));
             pstmt.setDouble(4, cardriver.Rating);
             pstmt.setInt(5, offer);
             pstmt.executeUpdate();
