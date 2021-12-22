@@ -688,20 +688,18 @@ public class DataRetriever {
         try (Connection conn = this.connect();
              PreparedStatement psmt = conn.prepareStatement(pstmtSql)
         ) {
+            Integer driverID= getID(driver.account.getUsername());
             stmt = conn.createStatement();
-            String sql = "SELECT DriverID,Rating,NumOfRatings FROM DriverAccount" +
-                    " WHERE DriverID = "+getID(driver.account.getUsername()) +";";
+            String sql = "SELECT Rating,NumOfRatings FROM DriverAccount" +
+                    " WHERE DriverID = "+driverID +";";
             ResultSet rs=stmt.executeQuery(sql);
             Integer rating = rs.getInt("Rating");
             Integer numRating = rs.getInt("NumOfRatings") +1;
             Integer avgRate = (rate + rating)/numRating;
-
-//            sql = "UPDATE DriverAccount SET Rating= "+avgRate+" ,NumOfRatings = "+numRating+
-//                    " WHERE DriverID = "+getID(driver.account.getUsername())+";";
-            psmt.setDouble(1,avgRate);
+            psmt.setInt(1,avgRate);
             psmt.setInt(2,numRating);
-            psmt.setInt(3,getID(driver.account.getUsername()));
-            psmt.executeQuery();
+            psmt.setInt(3,driverID);
+            psmt.executeUpdate();
             stmt.close();
             c.close();
         } catch (Exception e) {
