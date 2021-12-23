@@ -1,6 +1,6 @@
 public class CarRequest {
     User client;
-    Driver carDriver;
+    Driver driver;
     double driverOffer;
     boolean isAccepted;
     int carRequestID;
@@ -19,8 +19,8 @@ public class CarRequest {
        // source.notify();
     }
 
-    void setCarDriver(CarDriver carDriver){
-        this.carDriver = carDriver;
+    void setDriver(Driver driver){
+        this.driver = driver;
         updateRequest();
     }
     void setDriverOffer(Double offer){

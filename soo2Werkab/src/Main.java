@@ -5,7 +5,7 @@ import java.util.Scanner;
 public class Main {
     static int choice;
     static boolean isLoggedIn = false, isDriver = false, isAdmin = false;
-    static CarDriver driver = null;
+    static Driver driver = null;
     static User user = null;
     static Admin admin = null;
     static Scanner in = new Scanner(System.in);
@@ -28,7 +28,7 @@ public class Main {
                 if (isAdmin) {
                     admin = l.getAdmin();
                 } else if (isDriver) {
-                    driver = l.getCarDriver();
+                    driver = l.getDriver();
                 } else {
                     user = l.getUser();
                 }
@@ -102,17 +102,17 @@ public class Main {
                         in.skip("\n");
                         source = in.nextLine();
                         Area a = new Area(source);
-                        driver.addFavouriteArea(a);
+                        //driver.addFavouriteArea(a);
                         break;
                     case 2:
-                        ArrayList<Area> areas = driver.getFavouriteAreas();
+                        /*ArrayList<Area> areas = driver.getFavouriteAreas();
                         for (Area area : areas) {
                             System.out.println(area.areaName);
-                        }
+                        }*/
                         break;
                     case 3:
                         while (choice > - 1) {
-                            ArrayList<Ride> rides = driver.listAllRides();
+                            /*ArrayList<Ride> rides = driver.listAllRides();
                             for (Ride ride : rides) {
                                 System.out.println(ride.getRideID() + " from " + ride.getSourceArea().toString() + " to " + ride.getDestinationArea().toString());
                             }
@@ -130,6 +130,8 @@ public class Main {
                             }
                             System.out.println("Enter 0 to refresh list or -1 to exit");
                             choice = in.nextInt();
+
+                             */
                         }
                         break;
                     case 4:
