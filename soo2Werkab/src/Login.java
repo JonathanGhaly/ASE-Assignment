@@ -4,7 +4,7 @@ public class Login {
     String password;
     Boolean isDriver = false, isLoggedin = false, isAdmin = false;
 
-    CarDriver c;
+    Driver c;
     User u;
     Admin admin;
 
@@ -12,21 +12,21 @@ public class Login {
         this.username = username;
         this.password = password;
         this.isLoggedin = d.Login(this);
-        if (isLoggedin && isDriver && ! d.isVerified(getCarDriver(username))) {
+        if (isLoggedin && isDriver && ! d.isVerified(getDriver(username))) {
             isLoggedin = false;
             System.out.println("Driver is not verified yet");
         } else if (isLoggedin) {
             System.out.println("Logged in successfully");
             if (isAdmin) admin = getAdmin();
-            else if (isDriver) c = getCarDriver(username);
+            else if (isDriver) c = getDriver(username);
             else u = getUser(username);
         } else {
             System.out.println("Wrong username or password");
         }
     }
 
-    CarDriver getCarDriver(String username) {
-        return d.getCarDriver(username);
+    private Driver getDriver(String username) {
+        return d.getDriver(username);
     }
 
     User getUser(String username) {
@@ -37,7 +37,7 @@ public class Login {
         return this.u;
     }
 
-    CarDriver getCarDriver() {
+    Driver getDriver() {
         return this.c;
     }
 
