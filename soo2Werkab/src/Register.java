@@ -15,7 +15,7 @@ public class Register {
             String nationalId = in.next();
             System.out.println("Please enter the licence number: ");
             String licenceNo = in.next();
-            Driver d = new CarDriver(acc,nationalId,licenceNo);
+            Driver d = new Driver(acc, nationalId, licenceNo, false,false, 0);
             data.DriverRegister(d);
         }
     }
