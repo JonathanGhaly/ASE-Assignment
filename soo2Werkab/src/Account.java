@@ -1,12 +1,9 @@
-import java.time.LocalDate;
-
-public class Account {
+public class Account extends EventListener {
 
     private String username;
     private String password;
     private String email;
     private String mobileNumber;
-    private LocalDate birthDate;
     private boolean isSuspended;
     private DataRetriever db;
 
@@ -16,16 +13,6 @@ public class Account {
         String firstThree = mobileNumber.substring(0, 3);
         if (!firstThree.equals("010") && !firstThree.equals("011") && !firstThree.equals("012")) return false;
         return true;
-    }
-
-    public Account(String username, String password, String email, String mobileNumber, LocalDate birthDate) {
-        this.username = username;
-        this.password = password;
-        this.email = email;
-        this.mobileNumber = mobileNumber;
-        this.birthDate = birthDate;
-        isSuspended = false;
-        db = DataRetriever.getInstance();
     }
 
     public Account(String username, String password, String email, String mobileNumber) {
@@ -77,5 +64,10 @@ public class Account {
 
     public Boolean getStatus() {
         return isSuspended;
+    }
+
+    @Override
+    public void update(){
+        
     }
 }

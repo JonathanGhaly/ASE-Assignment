@@ -1,4 +1,4 @@
-public class Ride {
+public class Ride extends Publisher {
     private Area sourceArea, destinationArea;
     private String rideStatus;
     int rideID;
