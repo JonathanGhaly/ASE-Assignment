@@ -1,6 +1,6 @@
 public class CarRequest {
     User client;
-    Driver driver;
+    Driver carDriver;
     double driverOffer;
     boolean isAccepted;
     int carRequestID;
@@ -8,32 +8,33 @@ public class CarRequest {
 
     User user;
     Area source, destination;
+
     CarRequest(User user, Area source, Area destination) {
         ride = new Ride(source, destination);
-        ride.makeRide(source, destination);
-        this.client=user;
-        isAccepted=false;
+        this.client = user;
+        isAccepted = false;
         DataRetriever db = DataRetriever.getInstance();
-
         db.makeCarRequest(this);
-       // source.notify();
+        // source.notify();
     }
 
-    void setDriver(Driver driver){
-        this.driver = driver;
+    void setCarDriver(CarDriver carDriver) {
+        this.carDriver = carDriver;
         updateRequest();
     }
-    void setDriverOffer(Double offer){
-        this.driverOffer=offer;
+
+    void setDriverOffer(Double offer) {
+        this.driverOffer = offer;
         updateRequest();
     }
-    void updateRequest(){
+
+    void updateRequest() {
         DataRetriever db = DataRetriever.getInstance();
         db.updateCarRequest(this);
     }
 
 
-    public void notifyUser(){ //TODO queryDB to notify User for change
+    public void notifyUser() { //TODO queryDB to notify User for change
         //TODO show driverOffer,Driver
 
     }
@@ -42,11 +43,11 @@ public class CarRequest {
         return 0.0;
     }
 
-//    void rate(int stars){
-//
-//    }
+    void rate(int stars) {
 
-    void responce( Boolean response){
+    }
+
+    void responce(Boolean response) {
 
     }
 
