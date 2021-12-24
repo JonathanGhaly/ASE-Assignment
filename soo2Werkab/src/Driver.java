@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Driver {
@@ -8,7 +9,7 @@ public class Driver {
     boolean isAccepted;
     int balance;
     Scanner sc;
-    DataRetriever d = DataRetriever.getInstance();
+    DataRetriever db = DataRetriever.getInstance();
 
     Driver(Account account, String nationalID, String drivingLicenseNumber, boolean isVerified, boolean isAccepted, int balance) {
         this.account = account;
@@ -18,17 +19,38 @@ public class Driver {
         this.isAccepted = isAccepted;
         this.balance = balance;
     }
+    public void addFavouriteArea(Area area) {
+        db.insertDriverFavouriteArea(this, area);
+    }
+
+    public ArrayList<Area> getFavouriteAreas() {
+        ArrayList<Area> areas;
+        areas = db.getCarDriverFavouriteArea(this);
+        return areas;
+    }
+
+    public void removeFavouriteArea(Area area) {
+        db.removeCarDriverFavouriteArea(this,area);
+    }
+
+    public void sendOffer(Ride ride,Integer offer){
+        db.makeDriverOffer(this,offer,ride);
+    }
 
     int rate() {
-        return d.getRating(d.getID(account.getUsername()));
+        return db.getRating(db.getID(account.getUsername()));
     }
 
-    void notifyOfRequest(CarRequest request) {
-        System.out.println("DO you want to accept the ride with : ");
-        System.out.println(request.toString());
-        sc = new Scanner(System.in);
-        Boolean choice = sc.nextBoolean();
-        request.responce(choice);
-    }
+//    void notifyOfRequest(CarRequest request) {
+//        System.out.println("DO you want to accept the ride with : ");
+//        System.out.println(request.toString());
+//        sc = new Scanner(System.in);
+//        Boolean choice = sc.nextBoolean();
+//        request.responce(choice);
+//
+//    }
+
+
+
 
 }

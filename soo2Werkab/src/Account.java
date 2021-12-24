@@ -1,4 +1,4 @@
-public class Account {
+public class Account extends EventListener {
 
     private String username;
     private String password;
@@ -64,5 +64,10 @@ public class Account {
 
     public Boolean getStatus() {
         return isSuspended;
+    }
+
+    @Override
+    public void update(){
+        
     }
 }
