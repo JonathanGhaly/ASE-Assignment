@@ -350,6 +350,8 @@ public class DataRetriever {
         }
     }
 
+
+
     public void insertDriverFavouriteArea(Driver driver, Area area) {
         String sql = "INSERT OR IGNORE INTO CarDriver (DriverID,LicenceNo,Areas) Values(?,?,?)";
         String sql2 = "SELECT IDAccount FROM Accounts where UserName = ?" + ";";
@@ -376,6 +378,7 @@ public class DataRetriever {
         }
 
     }
+
 
     public ArrayList<Area> getCarDriverFavouriteArea(Driver driver) {
         ArrayList<Area> areas = new ArrayList<>();
