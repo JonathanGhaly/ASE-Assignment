@@ -86,6 +86,7 @@ public class Main {
                         break;
                     case 3:
                         System.out.println("Enter username");
+                        username = in.next();
                         admin.suspend(username, 0);
                         break;
                     case 4:

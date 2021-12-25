@@ -504,7 +504,7 @@ public class DataRetriever {
         String sql = "select Rating from DriverAccount\nwhere DriverID = ?;";
         int rate = 0;
         try (Connection conn = this.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, driverID);
             ResultSet rs = pstmt.executeQuery();
             rate = rs.getInt("Rating");
@@ -520,7 +520,6 @@ public class DataRetriever {
     }
 
     public User getUserDB(Integer id) {
-
         String sql = "select Rating from DriverAccount\nwhere DriverId = " + id + ";";
         try (Connection conn = this.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -540,16 +539,20 @@ public class DataRetriever {
     }
 
     public void changeStateDB(String username, int value) {
-        String sql = "UPDATE Accounts\n " +
-                    "SET isSuspended = ?\n" +
-                    "WHERE UserName = ?;";
+        String sql = "UPDATE Accounts\n" +
+                "SET isSuspended = ?\n" +
+                "WHERE UserName = ?;";
         try (Connection conn = this.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             PreparedStatement pstmt = conn.prepareStatement(sql)){
+
+            pstmt.setInt(1, value);
+            pstmt.setString(2, username);
             Class.forName("org.sqlite.JDBC");
             c = DriverManager.getConnection("jdbc:sqlite:soo2Werkab.db");
-            stmt = c.createStatement();
-            stmt.executeUpdate(sql);
+            //pstmt = c.createStatement();
+            pstmt.executeUpdate();
             stmt.close();
+            pstmt.close();
             c.close();
         } catch (Exception e) {
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
