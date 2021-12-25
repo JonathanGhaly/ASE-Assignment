@@ -310,7 +310,7 @@ public class DataRetriever {
             int id = this.getID(driver.account.getUsername());
             pstmt.setInt(1, id);
             ResultSet rs = pstmt.executeQuery();
-            if(rs.getInt("IsVerified")>0){
+            if(rs.getBoolean("IsVerified")){
                 return true;
             }else{
                 return false;
@@ -409,9 +409,9 @@ public class DataRetriever {
             ResultSet rs = pstmt.executeQuery();
             pstmt2.setInt(1, rs.getInt("IDAccount"));
             ResultSet rs2 = pstmt2.executeQuery();
-            int id = rs2.getInt("DriverID");
+            int id = rs.getInt("IDAccount");
             Account account = new Account(rs.getString("UserName"), rs.getString("Password"), rs.getString("Email"), rs.getString("mobileNo"));
-            Driver driver = new Driver(account, rs2.getString("NationalID"), rs2.getString("LicenceNo"), rs2.getBoolean("isVerified"), rs2.getBoolean("isAccepted"), rs.getInt("Balance"));
+            Driver driver = new Driver(account, rs2.getString("NationalID"), rs2.getString("LicenceNo"), rs2.getBoolean("isVerified"), rs2.getBoolean("isAccepted"), rs2.getInt("Balance"));
             pstmt.close();
             pstmt2.close();
             c.close();
@@ -446,8 +446,8 @@ public class DataRetriever {
                 "SELECT Areas FROM CarDriver WHERE DriverID = ? AND Areas = ?)";
 
         try (Connection conn = this.connect();
-            PreparedStatement pstmt = conn.prepareStatement(sql)
-            ) {
+             PreparedStatement pstmt = conn.prepareStatement(sql)
+        ) {
             pstmt.setString(2,area.toString());
             pstmt.setInt(1,getID(driver.account.getUsername()));
             ResultSet rs = pstmt.executeQuery();
@@ -520,7 +520,6 @@ public class DataRetriever {
     }
 
     public User getUserDB(Integer id) {
-
         String sql = "select Rating from DriverAccount\nwhere DriverId = " + id + ";";
         try (Connection conn = this.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -540,15 +539,20 @@ public class DataRetriever {
     }
 
     public void changeStateDB(String username, int value) {
-        try {
+        String sql = "UPDATE Accounts\n" +
+                "SET isSuspended = ?\n" +
+                "WHERE UserName = ?;";
+        try (Connection conn = this.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)){
+
+            pstmt.setInt(1, value);
+            pstmt.setString(2, username);
             Class.forName("org.sqlite.JDBC");
             c = DriverManager.getConnection("jdbc:sqlite:soo2Werkab.db");
-            stmt = c.createStatement();
-            String sql = "UPDATE Accounts\n " +
-                    "SET isSuspended = " + value + "\n" +
-                    "WHERE UserName = " + username + ";";
-            stmt.executeUpdate(sql);
+            //pstmt = c.createStatement();
+            pstmt.executeUpdate();
             stmt.close();
+            pstmt.close();
             c.close();
         } catch (Exception e) {
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
@@ -561,7 +565,7 @@ public class DataRetriever {
                 "SET IsVerified = 1\n" +
                 "WHERE DriverID = ?;";
         try (Connection conn = this.connect();
-        PreparedStatement pstmt = conn.prepareStatement(sql)){
+             PreparedStatement pstmt = conn.prepareStatement(sql)){
             pstmt.setInt(1, id);
             Class.forName("org.sqlite.JDBC");
             c = DriverManager.getConnection("jdbc:sqlite:soo2Werkab.db");
@@ -610,14 +614,14 @@ public class DataRetriever {
             else{
                 pstmt.setInt(2,0);
             }
-                pstmt.setInt(3, getID(carRequest.client.account.getUsername()));
-                pstmt.setInt(4, carRequest.ride.getRideID());
-                pstmt.setDouble(5, 0);
-                pstmt.setInt(6, 0);
-                pstmt.executeUpdate();
-                pstmt.close();
-                stmt.close();
-                 c.close();
+            pstmt.setInt(3, getID(carRequest.client.account.getUsername()));
+            pstmt.setInt(4, carRequest.ride.getRideID());
+            pstmt.setDouble(5, 0);
+            pstmt.setInt(6, 0);
+            pstmt.executeUpdate();
+            pstmt.close();
+            stmt.close();
+            c.close();
         } catch (Exception e) {
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
             System.exit(0);
