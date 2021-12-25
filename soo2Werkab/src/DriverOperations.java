@@ -5,7 +5,7 @@ public class DriverOperations {
 
     String showRating(Driver driver) {
         DataRetriever db = DataRetriever.getInstance();
-        return "Your current rating is: " + db.getDriverRating(driver.nationalID);
+        return "Your current rating is: " + db.getRating(db.getID(driver.account.getUsername()));
     }
 
     void notifyOfRequest(Driver driver, CarRequest request) {
