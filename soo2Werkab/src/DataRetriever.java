@@ -504,7 +504,7 @@ public class DataRetriever {
         String sql = "select Rating from DriverAccount\nwhere DriverID = ?;";
         int rate = 0;
         try (Connection conn = this.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, driverID);
             ResultSet rs = pstmt.executeQuery();
             rate = rs.getInt("Rating");
