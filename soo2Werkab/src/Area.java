@@ -6,9 +6,8 @@ public class Area extends Publisher {
         areaName = "";
     }
 
-    Area(String areaName) {  //TODO
+    Area(String areaName) {
         this.areaName = areaName;
-
     }
 
     Area(String areaName, Driver[] drivers) { // used in DB

@@ -4,7 +4,7 @@ public class Login {
     String password;
     Boolean isDriver = false, isLoggedin = false, isAdmin = false;
 
-    Driver driver;
+    Driver c;
     User u;
     Admin admin;
 
@@ -18,7 +18,7 @@ public class Login {
         } else if (isLoggedin) {
             System.out.println("Logged in successfully");
             if (isAdmin) admin = getAdmin();
-            else if (isDriver) driver = getDriver(username);
+            else if (isDriver) c = getDriver(username);
             else u = getUser(username);
         } else {
             System.out.println("Wrong username or password");
@@ -38,7 +38,7 @@ public class Login {
     }
 
     Driver getDriver() {
-        return this.driver;
+        return this.c;
     }
 
     Boolean isDriver() {

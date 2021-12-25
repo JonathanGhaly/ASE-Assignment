@@ -11,7 +11,7 @@ public class UserOperations {
     }
 
     void rateDriver(int stars) {
-        currentRequest.rate(stars);
+        //currentRequest.rate(stars);
     }
 
     Double getDriverRating() {

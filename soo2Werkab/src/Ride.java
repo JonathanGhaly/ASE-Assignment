@@ -15,7 +15,6 @@ public class Ride extends Publisher {
         this.sourceArea = sourceArea;
         this.destinationArea = destinationArea;
         this.rideStatus = "Pending";
-        db.insertRide(this);
     }
 
     public void setRideStatus(String status) {
@@ -41,5 +40,11 @@ public class Ride extends Publisher {
 
     public int getRideID() {
         return rideID;
+    }
+    void makeRide(Area sourceArea,Area destinationArea){
+        this.sourceArea = sourceArea;
+        this.destinationArea = destinationArea;
+        this.rideStatus = "Pending";
+        db.insertRide(this);
     }
 }

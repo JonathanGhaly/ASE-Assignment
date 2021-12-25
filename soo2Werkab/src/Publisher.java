@@ -1,5 +1,5 @@
 public class Publisher {
-    public EventManager events;
+    public  EventManager events;
 
     public Publisher(){
         events = new EventManager();

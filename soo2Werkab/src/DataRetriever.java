@@ -449,8 +449,8 @@ public class DataRetriever {
                 "SELECT Areas FROM CarDriver WHERE DriverID = ? AND Areas = ?)";
 
         try (Connection conn = this.connect();
-            PreparedStatement pstmt = conn.prepareStatement(sql)
-            ) {
+             PreparedStatement pstmt = conn.prepareStatement(sql)
+        ) {
             pstmt.setString(2,area.toString());
             pstmt.setInt(1,getID(driver.account.getUsername()));
             ResultSet rs = pstmt.executeQuery();
@@ -568,7 +568,7 @@ public class DataRetriever {
                 "SET IsVerified = 1\n" +
                 "WHERE DriverID = ?;";
         try (Connection conn = this.connect();
-        PreparedStatement pstmt = conn.prepareStatement(sql)){
+             PreparedStatement pstmt = conn.prepareStatement(sql)){
             pstmt.setInt(1, id);
             Class.forName("org.sqlite.JDBC");
             c = DriverManager.getConnection("jdbc:sqlite:soo2Werkab.db");
@@ -617,14 +617,14 @@ public class DataRetriever {
             else{
                 pstmt.setInt(2,0);
             }
-                pstmt.setInt(3, getID(carRequest.client.account.getUsername()));
-                pstmt.setInt(4, carRequest.ride.getRideID());
-                pstmt.setDouble(5, 0);
-                pstmt.setInt(6, 0);
-                pstmt.executeUpdate();
-                pstmt.close();
-                stmt.close();
-                 c.close();
+            pstmt.setInt(3, getID(carRequest.client.account.getUsername()));
+            pstmt.setInt(4, carRequest.ride.getRideID());
+            pstmt.setDouble(5, 0);
+            pstmt.setInt(6, 0);
+            pstmt.executeUpdate();
+            pstmt.close();
+            stmt.close();
+            c.close();
         } catch (Exception e) {
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
             System.exit(0);
