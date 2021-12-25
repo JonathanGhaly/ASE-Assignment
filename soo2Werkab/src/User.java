@@ -32,9 +32,9 @@ public class User {
     // TODO rate driver using driver operations.
     void rateDriver(String driverUserName,Integer stars) {
 //        currentRequest.rate(stars);
-        DataRetriever db = DataRetriever.getInstance();
-        //Driver driver = db.getCarDriver(driverUserName);
-        //db.rateDriver(driver,stars);
+       DataRetriever db = DataRetriever.getInstance();
+       //Driver driver = db.getCarDriver(driverUserName);
+       //db.rateDriver(driver,stars);
     }
 
 //

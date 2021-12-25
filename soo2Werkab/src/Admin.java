@@ -4,16 +4,15 @@ public class Admin {
     DataRetriever dataRetriever = DataRetriever.getInstance();
     Account account;
 
-    public Admin(String username, String password, String email, String mobileNumber) {
-        account = new Account(username, password, email, mobileNumber);
+    public Admin(Account account) {this.account = account;
     }
 
-    public void suspend(Account account, int type) {
-        dataRetriever.changeStateDB(account.getUsername(), type);
+    public void suspend(String username, int type) {
+        dataRetriever.changeStateDB(username, type);
     }
 
-    public void verifyDriver(Driver driver) {
-        dataRetriever.verifyDriverDB(dataRetriever.getID(driver.account.getUsername()));
+    public void verifyDriver(String username) {
+        dataRetriever.verifyDriverDB(dataRetriever.getID(username));
     }
 
     public void manageUser(User user) {

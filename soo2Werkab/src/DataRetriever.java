@@ -47,7 +47,6 @@ public class DataRetriever {
                     " mobileNo         CHAR(11) NOT NULL ," +
                     "isSuspended SMALLINT ," +
                     "create_time TEXT NULL ," +
-                    "birthDate Date ," +
                     "UNIQUE(UserName))";
             stmt.executeUpdate(sql);
             stmt.close();
@@ -447,8 +446,8 @@ public class DataRetriever {
                 "SELECT Areas FROM CarDriver WHERE DriverID = ? AND Areas = ?)";
 
         try (Connection conn = this.connect();
-            PreparedStatement pstmt = conn.prepareStatement(sql)
-            ) {
+             PreparedStatement pstmt = conn.prepareStatement(sql)
+        ) {
             pstmt.setString(2,area.toString());
             pstmt.setInt(1,getID(driver.account.getUsername()));
             ResultSet rs = pstmt.executeQuery();
@@ -521,7 +520,6 @@ public class DataRetriever {
     }
 
     public User getUserDB(Integer id) {
-
         String sql = "select Rating from DriverAccount\nwhere DriverId = " + id + ";";
         try (Connection conn = this.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -541,16 +539,20 @@ public class DataRetriever {
     }
 
     public void changeStateDB(String username, int value) {
-        String sql = "UPDATE Accounts\n " +
-                    "SET isSuspended = ?\n" +
-                    "WHERE UserName = ?;";
+        String sql = "UPDATE Accounts\n" +
+                "SET isSuspended = ?\n" +
+                "WHERE UserName = ?;";
         try (Connection conn = this.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             PreparedStatement pstmt = conn.prepareStatement(sql)){
+
+            pstmt.setInt(1, value);
+            pstmt.setString(2, username);
             Class.forName("org.sqlite.JDBC");
             c = DriverManager.getConnection("jdbc:sqlite:soo2Werkab.db");
-            stmt = c.createStatement();
-            stmt.executeUpdate(sql);
+            //pstmt = c.createStatement();
+            pstmt.executeUpdate();
             stmt.close();
+            pstmt.close();
             c.close();
         } catch (Exception e) {
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
@@ -563,7 +565,7 @@ public class DataRetriever {
                 "SET IsVerified = 1\n" +
                 "WHERE DriverID = ?;";
         try (Connection conn = this.connect();
-        PreparedStatement pstmt = conn.prepareStatement(sql)){
+             PreparedStatement pstmt = conn.prepareStatement(sql)){
             pstmt.setInt(1, id);
             Class.forName("org.sqlite.JDBC");
             c = DriverManager.getConnection("jdbc:sqlite:soo2Werkab.db");
@@ -612,14 +614,14 @@ public class DataRetriever {
             else{
                 pstmt.setInt(2,0);
             }
-                pstmt.setInt(3, getID(carRequest.client.account.getUsername()));
-                pstmt.setInt(4, carRequest.ride.getRideID());
-                pstmt.setDouble(5, 0);
-                pstmt.setInt(6, 0);
-                pstmt.executeUpdate();
-                pstmt.close();
-                stmt.close();
-                 c.close();
+            pstmt.setInt(3, getID(carRequest.client.account.getUsername()));
+            pstmt.setInt(4, carRequest.ride.getRideID());
+            pstmt.setDouble(5, 0);
+            pstmt.setInt(6, 0);
+            pstmt.executeUpdate();
+            pstmt.close();
+            stmt.close();
+            c.close();
         } catch (Exception e) {
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
             System.exit(0);
