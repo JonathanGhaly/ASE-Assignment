@@ -540,13 +540,14 @@ public class DataRetriever {
     }
 
     public void changeStateDB(String username, int value) {
-        try {
+        String sql = "UPDATE Accounts\n " +
+                    "SET isSuspended = ?\n" +
+                    "WHERE UserName = ?;";
+        try (Connection conn = this.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
             Class.forName("org.sqlite.JDBC");
             c = DriverManager.getConnection("jdbc:sqlite:soo2Werkab.db");
             stmt = c.createStatement();
-            String sql = "UPDATE Accounts\n " +
-                    "SET isSuspended = " + value + "\n" +
-                    "WHERE UserName = " + username + ";";
             stmt.executeUpdate(sql);
             stmt.close();
             c.close();
