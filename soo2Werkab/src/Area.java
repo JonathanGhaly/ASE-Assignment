@@ -1,5 +1,6 @@
 public class Area extends Publisher {
     String areaName;
+    DriverOperations driverOperations;
     Driver[] drivers;
 
     Area() {

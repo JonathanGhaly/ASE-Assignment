@@ -1,12 +1,14 @@
-/*import java.util.ArrayList;
+import java.util.ArrayList;
 
 public class CarDriver extends Driver {
-    int Rating = 0;
+
 
     DataRetriever db = DataRetriever.getInstance();
-    CarDriver(){
+
+    CarDriver() {
 
     }
+
     CarDriver(Account a, String nationalID, String drivingLicenseNumber) {
         this.account = a;
         this.nationalID = nationalID;
@@ -14,10 +16,10 @@ public class CarDriver extends Driver {
     }
 
     public ArrayList<Ride> listAllRides() {
-        ArrayList<Ride> rides=new ArrayList<>();
+        ArrayList<Ride> rides = new ArrayList<>();
         ArrayList<Area> areas = getFavouriteAreas();
-        for(Area area : areas){
-            rides.addAll(db.getRidesFromArea(this,area));
+        for (Area area : areas) {
+            rides.addAll(db.getRidesFromArea(area));
         }
 
         return rides;
@@ -34,11 +36,10 @@ public class CarDriver extends Driver {
     }
 
     public void removeFavouriteArea(Area area) {
-        db.removeCarDriverFavouriteArea(this,area);
+        db.removeCarDriverFavouriteArea(this, area);
     }
 
-    public void sendOffer(Ride ride,Integer offer){
-        db.makeDriverOffer(this,offer,ride);
+    public void sendOffer(Ride ride, Double offer) {
+        db.makeDriverOffer(this, offer, ride);
     }
 }
-*/

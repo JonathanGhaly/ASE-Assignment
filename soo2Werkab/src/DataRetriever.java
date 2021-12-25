@@ -47,6 +47,7 @@ public class DataRetriever {
                     " mobileNo         CHAR(11) NOT NULL ," +
                     "isSuspended SMALLINT ," +
                     "create_time TEXT NULL ," +
+                    "birthDate Date ," +
                     "UNIQUE(UserName))";
             stmt.executeUpdate(sql);
             stmt.close();
@@ -350,8 +351,6 @@ public class DataRetriever {
         }
     }
 
-
-
     public void insertDriverFavouriteArea(Driver driver, Area area) {
         String sql = "INSERT OR IGNORE INTO CarDriver (DriverID,LicenceNo,Areas) Values(?,?,?)";
         String sql2 = "SELECT IDAccount FROM Accounts where UserName = ?" + ";";
@@ -378,7 +377,6 @@ public class DataRetriever {
         }
 
     }
-
 
     public ArrayList<Area> getCarDriverFavouriteArea(Driver driver) {
         ArrayList<Area> areas = new ArrayList<>();

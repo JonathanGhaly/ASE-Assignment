@@ -2,31 +2,29 @@ public class Login {
     DataRetriever d = DataRetriever.getInstance();
     String username;
     String password;
-    Boolean isDriver = false, isLoggedin = false, isAdmin = false;
+    Boolean isDriver = false, isLoggedin = false;
 
-    Driver c;
+    CarDriver c;
     User u;
-    Admin admin;
 
     Login(String username, String password) {
         this.username = username;
         this.password = password;
         this.isLoggedin = d.Login(this);
-        if (isLoggedin && isDriver && ! d.isVerified(getDriver(username))) {
+        if (isLoggedin && isDriver && !getCarDriver(username).isVerified) {
             isLoggedin = false;
             System.out.println("Driver is not verified yet");
         } else if (isLoggedin) {
             System.out.println("Logged in successfully");
-            if (isAdmin) admin = getAdmin();
-            else if (isDriver) c = getDriver(username);
+            if (isDriver) c = getCarDriver(username);
             else u = getUser(username);
         } else {
             System.out.println("Wrong username or password");
         }
     }
 
-    private Driver getDriver(String username) {
-        return d.getDriver(username);
+    CarDriver getCarDriver(String username) {
+        return d.getCarDriver(username);
     }
 
     User getUser(String username) {
@@ -37,22 +35,16 @@ public class Login {
         return this.u;
     }
 
-    Driver getDriver() {
+    CarDriver getCarDriver() {
         return this.c;
     }
 
     Boolean isDriver() {
         return this.isDriver;
     }
-    void setIsDriver(boolean isDriver){
-        this.isDriver = isDriver;
-    }
+
     Boolean getIsLoggedin() {
         return this.isLoggedin;
-    }
-
-    Admin getAdmin() {
-        return d.getAdmin(this.username);
     }
 
 }
