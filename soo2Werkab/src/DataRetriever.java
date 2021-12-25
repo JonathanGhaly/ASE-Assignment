@@ -311,7 +311,7 @@ public class DataRetriever {
             int id = this.getID(driver.account.getUsername());
             pstmt.setInt(1, id);
             ResultSet rs = pstmt.executeQuery();
-            if(rs.getInt("IsVerified")>0){
+            if(rs.getBoolean("IsVerified")){
                 return true;
             }else{
                 return false;
@@ -410,9 +410,9 @@ public class DataRetriever {
             ResultSet rs = pstmt.executeQuery();
             pstmt2.setInt(1, rs.getInt("IDAccount"));
             ResultSet rs2 = pstmt2.executeQuery();
-            int id = rs2.getInt("DriverID");
+            int id = rs.getInt("IDAccount");
             Account account = new Account(rs.getString("UserName"), rs.getString("Password"), rs.getString("Email"), rs.getString("mobileNo"));
-            Driver driver = new Driver(account, rs2.getString("NationalID"), rs2.getString("LicenceNo"), rs2.getBoolean("isVerified"), rs2.getBoolean("isAccepted"), rs.getInt("Balance"));
+            Driver driver = new Driver(account, rs2.getString("NationalID"), rs2.getString("LicenceNo"), rs2.getBoolean("isVerified"), rs2.getBoolean("isAccepted"), rs2.getInt("Balance"));
             pstmt.close();
             pstmt2.close();
             c.close();
@@ -541,13 +541,14 @@ public class DataRetriever {
     }
 
     public void changeStateDB(String username, int value) {
-        try {
+        String sql = "UPDATE Accounts\n " +
+                    "SET isSuspended = ?\n" +
+                    "WHERE UserName = ?;";
+        try (Connection conn = this.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
             Class.forName("org.sqlite.JDBC");
             c = DriverManager.getConnection("jdbc:sqlite:soo2Werkab.db");
             stmt = c.createStatement();
-            String sql = "UPDATE Accounts\n " +
-                    "SET isSuspended = " + value + "\n" +
-                    "WHERE UserName = " + username + ";";
             stmt.executeUpdate(sql);
             stmt.close();
             c.close();
