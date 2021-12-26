@@ -131,7 +131,7 @@ public class DataRetriever {
                     "RideID INTEGER NOT NULL ," +
                     "Rating DOUBLE NOT NULL ," +
                     "Price INTEGER NOT NULL," +
-                    "FOREIGN KEY(DriverName)  REFERENCES Account(UserName)," +
+                    "FOREIGN KEY(DriverName)  REFERENCES Accounts(UserName)," +
                     "FOREIGN KEY(DriverID)  REFERENCES DriverAccount(DriverID)," +
                     "FOREIGN KEY(RideID)  REFERENCES Requests(RideID)," +
                     "FOREIGN KEY(Rating)  REFERENCES DriverAccount(Rating)," +
@@ -144,7 +144,41 @@ public class DataRetriever {
             System.exit(0);
         }
     }
-
+    public void AreaDB(){
+        try {
+            Class.forName("org.sqlite.JDBC");
+            c = DriverManager.getConnection("jdbc:sqlite:soo2Werkab.db");
+            stmt = c.createStatement();
+            String sql = "CREATE TABLE IF NOT EXISTS Areas " +
+                    "(ID INTEGER PRIMARY KEY NOT NULL," +
+                    "AreaName CHAR(50) NOT NULL," +
+                    "DISCOUNT INTEGER DEFAULT 0)";
+            stmt.executeUpdate(sql);
+            stmt.close();
+            c.close();
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        }
+    }
+    public void favoriteAreaDB(){
+        try {
+            Class.forName("org.sqlite.JDBC");
+            c = DriverManager.getConnection("jdbc:sqlite:soo2Werkab.db");
+            stmt = c.createStatement();
+            String sql = "CREATE TABLE IF NOT EXISTS FavoriteArea " +
+                    "(AreaID INTEGER NOT NULL," +
+                    "DriverID INTEGER NOT NULL," +
+                    "FOREIGN KEY (AreaID) REFERENCES Areas(ID)," +
+                    "FOREIGN KEY (DriverID)REFERENCES DriverAccount(DriverID))";
+            stmt.executeUpdate(sql);
+            stmt.close();
+            c.close();
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        }
+    }
     /*public void carDriverDB() {
         try {
             Class.forName("org.sqlite.JDBC");
@@ -349,28 +383,54 @@ public class DataRetriever {
             System.exit(0);
         }
     }
-
-
-
-    public void insertDriverFavouriteArea(Driver driver, Area area) {
-        String sql = "INSERT OR IGNORE INTO CarDriver (DriverID,LicenceNo,Areas) Values(?,?,?)";
-        String sql2 = "SELECT IDAccount FROM Accounts where UserName = ?" + ";";
+    public void addArea(Area area){
+        String sql = "INSERT OR IGNORE INTO Areas (AreaName) Values(?)";
+        try (Connection conn = this.connect();
+            PreparedStatement pstmt = conn.prepareStatement(sql)
+        ){
+            //ResultSet rs = stmt.executeQuery("SELECT max(ID) AS MAX FROM Areas;");
+            //pstmt.setInt(1,rs.getInt("MAX") + 1);
+            pstmt.setString(1,area.toString());
+            pstmt.executeUpdate();
+            stmt.close();
+            pstmt.close();
+           // rs.close();
+        }catch (Exception e){
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        }
+    }
+    public int getAreaId(Area area){
+        this.addArea(area);
+        String sql = "SELECT ID FROM Areas where AreaName = ?" + ";";
+        int id = -1;
+        try (Connection conn = this.connect();
+            PreparedStatement pstmt = conn.prepareStatement(sql)
+        ){
+            pstmt.setString(1,area.toString());
+            ResultSet rs = pstmt.executeQuery();
+            id = rs.getInt("ID");
+            pstmt.close();
+            rs.close();
+        }catch (Exception e){
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        }
+        return id;
+    }
+    public void insertDriverFavoriteArea(Driver driver, Area area) {
+        String sql = "INSERT OR IGNORE INTO FavoriteArea (AreaID,DriverID) Values(?,?)";
         try (Connection conn = this.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql);
-             PreparedStatement pstmt2 = conn.prepareStatement(sql2)
         ) {
+
             stmt = conn.createStatement();
             String username = driver.account.getUsername();
-            pstmt2.setString(1, username);
             //   ResultSet rs = stmt.executeQuery("SELECT IDAccount FROM Accounts where UserName = " + username + ";");
-            ResultSet rs = pstmt2.executeQuery();
-            int id = rs.getInt("IDAccount");
-            pstmt.setInt(1, id);
-            pstmt.setString(2, driver.drivingLicenseNumber);
-            pstmt.setString(3, area.toString());
+            pstmt.setInt(1, getAreaId(area));
+            pstmt.setInt(2, getID(driver.account.getUsername()));
             pstmt.executeUpdate();
             pstmt.close();
-            pstmt2.close();
             c.close();
         } catch (Exception e) {
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
@@ -378,17 +438,20 @@ public class DataRetriever {
         }
 
     }
-
-
     public ArrayList<Area> getCarDriverFavouriteArea(Driver driver) {
         ArrayList<Area> areas = new ArrayList<>();
-        String sql = "SELECT Areas FROM CarDriver Where LicenceNo = " + driver.drivingLicenseNumber + ";";
+        String sql = "SELECT AreaID FROM FavoriteArea Where DriverID = " + getID(driver.account.getUsername()) + ";";
+        String sql2 = "SELECT AreaName FROM Areas WHERE ID = ?;";
         try (Connection conn = this.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             PreparedStatement pstmt2 = conn.prepareStatement(sql2);
+             ) {
             stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(sql);
+            ResultSet rs = stmt.executeQuery(sql),rs2;
             while (rs.next()) {
-                areas.add(new Area(rs.getString("Areas")));
+                pstmt2.setInt(1,rs.getInt("AreaID"));
+                rs2 = pstmt2.executeQuery();
+                areas.add(new Area(rs2.getString("AreaName")));
             }
             pstmt.close();
             c.close();
@@ -442,11 +505,11 @@ public class DataRetriever {
             return null;
         }
     }
-
+//TODO edit function to adapt with new db
     public ArrayList<Ride> getRidesFromArea(Driver driver,Area area) {
         ArrayList<Ride> rides = new ArrayList<>();
         String sql = "SELECT IDRides,SourceArea,DestinationArea,RideStatus FROM Rides WHERE SourceArea =(" +
-                "SELECT Areas FROM CarDriver WHERE DriverID = ? AND Areas = ?)";
+                "SELECT Areas FROM FavoriteArea WHERE DriverID = ? AND AreaID = ?)";
 
         try (Connection conn = this.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)
@@ -481,7 +544,7 @@ public class DataRetriever {
             stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
             int id = rs.getInt("IDAccount");
-            sql = "DELETE FROM CarDriver WHERE DriverID = " + id + " AND Areas = " + area.toString() + ";";
+            sql = "DELETE FROM DriverAccount WHERE DriverID = " + id + " AND Areas = " + area.toString() + ";";
             stmt.executeQuery(sql);
             stmt.close();
             c.close();
@@ -501,6 +564,8 @@ public class DataRetriever {
         this.UserAccountsDB();
         this.adminAccountsDB();
         this.offersDB();
+        this.AreaDB();
+        this.favoriteAreaDB();
     }
 
     int getRating(int driverID) {
