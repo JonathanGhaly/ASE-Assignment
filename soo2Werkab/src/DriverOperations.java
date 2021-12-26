@@ -5,8 +5,8 @@ public class DriverOperations {
     Scanner sc = new Scanner(System.in);
     DataRetriever db = DataRetriever.getInstance();
 
-    String showRating(Driver driver) {
-        return "Your current rating is: " + db.getRating(db.getID(driver.account.getUsername()));
+    Double showRating(Driver driver) {
+        return db.getRating(db.getID(driver.account.getUsername()));
     }
 
     void notifyOfRequest(Driver driver, CarRequest request) {
@@ -29,14 +29,14 @@ public class DriverOperations {
         db.removeCarDriverFavouriteArea(driver, area);
     }
 
-    public void sendOffer(Driver driver, Ride ride, Integer offer) {
+    public void sendOffer(Driver driver, Ride ride, Double offer) {
         db.makeDriverOffer(driver, offer, ride);
     }
 
     public ArrayList<Ride> listAllRides(Driver driver) {
         ArrayList<Ride> rides = new ArrayList<>();
         for (Area area : getFavouriteAreas(driver)) {
-            rides.addAll(db.getRidesFromArea(driver, area));
+            rides.addAll(db.getRidesFromArea(driver));
         }
         return rides;
     }

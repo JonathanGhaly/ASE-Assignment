@@ -1,4 +1,3 @@
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -97,7 +96,7 @@ public class Main {
                 }
             } else if (isDriver) {
                 driverOperations = new DriverOperations();
-                System.out.println("1- Set favorite area\n2- List favorite areas\n3- List favorite rides available\n4- Show my rating\n5- Logout");
+                System.out.println("1- Set favorite area\n2- List favorite areas\n3- List favorite rides available\n4- Show my rating\n5- Remove favorite area\n6- Logout");
                 choice = in.nextInt();
                 switch (choice) {
                     case 1:
@@ -123,7 +122,7 @@ public class Main {
                                 for (Ride ride : driverOperations.listAllRides(driver)) {
                                     if (ride.getRideID() == driverOffer) {
                                         System.out.println("Please enter the price");
-                                        Integer offerPrice = in.nextInt();
+                                        Double offerPrice = in.nextDouble();
                                         Offer offer = new Offer(offerPrice, driver);
                                         driverOperations.sendOffer(driver,ride, offerPrice);
                                     }
@@ -138,6 +137,12 @@ public class Main {
                         System.out.println("Your rate is: " + driverOperations.showRating(driver));
                         break;
                     case 5:
+                        System.out.println("Please enter the area name you want to remove");
+                        String areaName = in.next();
+                        Area area = new Area(areaName);
+                        driverOperations.removeFavouriteArea(driver,area);
+                        break;
+                    case 6:
                         return;
                     default:
                         System.out.println("Wrong command");

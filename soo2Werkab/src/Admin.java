@@ -8,11 +8,11 @@ public class Admin {
     }
 
     public void suspend(String username, int type) {
-        dataRetriever.changeStateDB(username, type);
+        dataRetriever.changeAccountState(username, type);
     }
 
     public void verifyDriver(String username) {
-        dataRetriever.verifyDriverDB(dataRetriever.getID(username));
+        dataRetriever.verifyDriver(dataRetriever.getID(username));
     }
 
     public void manageUser(User user) {
