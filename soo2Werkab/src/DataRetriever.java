@@ -9,6 +9,10 @@ public class DataRetriever {
     static DataRetriever dataRetriever;
     int accountId;
 
+    /**
+     * Method that make only one object of type dataRetriever is available to use during runtime
+     * @return dataRetriever object if found or new one if not found
+     */
     public static DataRetriever getInstance() {
         if (dataRetriever == null) {
             dataRetriever = new DataRetriever();
@@ -22,6 +26,10 @@ public class DataRetriever {
         this.connect();
     }
 
+    /**
+     * Established connection to the database file
+     * @return connection
+     */
     public Connection connect() {
         try {
             Class.forName("org.sqlite.JDBC");
@@ -144,6 +152,7 @@ public class DataRetriever {
             System.exit(0);
         }
     }
+
     public void AreaDB(){
         try {
             Class.forName("org.sqlite.JDBC");
@@ -161,6 +170,7 @@ public class DataRetriever {
             System.exit(0);
         }
     }
+
     public void favoriteAreaDB(){
         try {
             Class.forName("org.sqlite.JDBC");
@@ -179,25 +189,6 @@ public class DataRetriever {
             System.exit(0);
         }
     }
-    /*public void carDriverDB() {
-        try {
-            Class.forName("org.sqlite.JDBC");
-            c = DriverManager.getConnection("jdbc:sqlite:soo2Werkab.db");
-            stmt = c.createStatement();
-            String sql = "CREATE TABLE IF NOT EXISTS CarDriver" +
-                    "(DriverID INTEGER ," +
-                    "LicenceNo CHAR(50) NOT NULL ," +
-                    "Areas CHAR(50) NULL," +
-                    "FOREIGN KEY(DriverID)  REFERENCES DriverAccount(DriverID)" +
-                    "UNIQUE(DriverID,Areas))";
-            stmt.executeUpdate(sql);
-            stmt.close();
-            c.close();
-        } catch (Exception e) {
-            System.err.println(e.getClass().getName() + ": " + e.getMessage());
-            System.exit(0);
-        }
-    }*/
 
     public void RequestDB() {
         try {
@@ -223,6 +214,10 @@ public class DataRetriever {
         }
     }
 
+    /**
+     * Add Account attributes to database by Account object if not exist
+     * @param a Account object that hold its attributes
+     */
     private void AccountRegister(Account a) {
         String sql = "INSERT OR IGNORE INTO Accounts (IDAccount,UserName,Password,Email,mobileNo,isSuspended,create_time) VALUES (?,?,?,?,?,?,?)";
         try (Connection conn = this.connect();
@@ -244,6 +239,10 @@ public class DataRetriever {
         System.out.println("Records created successfully");
     }
 
+    /**
+     * Normal account register in addition add the account to UserAccounts as a foreign key
+     * @param a Account object that hold its attributes
+     */
     public void UserRegister(Account a) {
         AccountRegister(a);
         String sql = "INSERT OR IGNORE INTO UserAccounts (AccountID) VALUES (?)";
@@ -261,6 +260,10 @@ public class DataRetriever {
         System.out.println("Records created successfully");
     }
 
+    /**
+     * Add Account attributes to database by Driver object if not exist in addition add it to DriverAccount
+     * @param d Driver object that hold Account and Driver attributes
+     */
     public void DriverRegister(Driver d) {
         AccountRegister(d.account);
         String sql = "INSERT OR IGNORE INTO DriverAccount (DriverID,LicenceNo,NationalID) VALUES (?,?,?)";
@@ -280,6 +283,11 @@ public class DataRetriever {
         System.out.println("Records created successfully");
     }
 
+    /**
+     * Check if account is in the database and enter a correct credentials
+     * @param acc object that hold username and password to check
+     * @return true if it is valid
+     */
     public Boolean Login(Login acc) {
         if (adminLogin(acc)) {
             acc.isAdmin = true;
@@ -315,6 +323,11 @@ public class DataRetriever {
         }
     }
 
+    /**
+     * Check if the logging in account is a driver
+     * @param acc object that hold username and password to check
+     * @return true if it is found in DriverAccount table
+     */
     Boolean isDriver(Login acc) {
         String sql = "SELECT IDAccount "
                 + " FROM Accounts where UserName = ?";
@@ -335,6 +348,11 @@ public class DataRetriever {
         }
     }
 
+    /**
+     * Check if the driver verified by the admin
+     * @param driver Driver to check
+     * @return true if IsVerified attribute in table equals 1
+     */
     Boolean isVerified(Driver driver){
         String sql = "SELECT IsVerified "
                 + " FROM DriverAccount where DriverID = ?";
@@ -353,6 +371,11 @@ public class DataRetriever {
             return false;
         }
     }
+
+    /**
+     * Insert ride to database
+     * @param ride Ride object that hold source and destination
+     */
     public void insertRide(Ride ride) {
         String sql = "INSERT OR IGNORE INTO Rides (IDRides,SourceArea,DestinationArea,RideStatus) Values(?,?,?,?)";
         try (Connection conn = this.connect();
@@ -373,6 +396,11 @@ public class DataRetriever {
 
     }
 
+    /**
+     * Update the ride status
+     * @param ride Ride to be updated
+     * @param status Updated status of the ride
+     */
     public void updateRideStatus(Ride ride, String status) {
         try (Connection conn = this.connect()) {
             stmt = conn.createStatement();
@@ -383,23 +411,31 @@ public class DataRetriever {
             System.exit(0);
         }
     }
+
+    /**
+     * Add area if not found in the Areas table
+     * @param area Area object to be added in the database
+     */
     public void addArea(Area area){
         String sql = "INSERT OR IGNORE INTO Areas (AreaName) Values(?)";
         try (Connection conn = this.connect();
             PreparedStatement pstmt = conn.prepareStatement(sql)
         ){
-            //ResultSet rs = stmt.executeQuery("SELECT max(ID) AS MAX FROM Areas;");
-            //pstmt.setInt(1,rs.getInt("MAX") + 1);
             pstmt.setString(1,area.toString());
             pstmt.executeUpdate();
             stmt.close();
             pstmt.close();
-           // rs.close();
         }catch (Exception e){
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
             System.exit(0);
         }
     }
+
+    /**
+     * Get the ID of the desired Area
+     * @param area Area Object that hold Area name
+     * @return AreaID (Int)
+     */
     public int getAreaId(Area area){
         this.addArea(area);
         String sql = "SELECT ID FROM Areas where AreaName = ?" + ";";
@@ -418,15 +454,19 @@ public class DataRetriever {
         }
         return id;
     }
+
+    /**
+     * Assign to driver favorite area and it doesn't allow duplicates
+     * @param driver Driver who want to add favorite area
+     * @param area Area to be added to the Driver
+     */
     public void insertDriverFavoriteArea(Driver driver, Area area) {
         String sql = "INSERT OR IGNORE INTO FavoriteArea (AreaID,DriverID) Values(?,?)";
         try (Connection conn = this.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql);
         ) {
-
             stmt = conn.createStatement();
             String username = driver.account.getUsername();
-            //   ResultSet rs = stmt.executeQuery("SELECT IDAccount FROM Accounts where UserName = " + username + ";");
             pstmt.setInt(1, getAreaId(area));
             pstmt.setInt(2, getID(driver.account.getUsername()));
             pstmt.executeUpdate();
@@ -438,6 +478,13 @@ public class DataRetriever {
         }
 
     }
+
+    /**
+     * Get all Driver Favorite Areas
+     * @param driver Driver to list his favorite area
+     * @return ArrayList of Area type
+     */
+
     public ArrayList<Area> getCarDriverFavouriteArea(Driver driver) {
         ArrayList<Area> areas = new ArrayList<>();
         String sql = "SELECT AreaID FROM FavoriteArea Where DriverID = " + getID(driver.account.getUsername()) + ";";
