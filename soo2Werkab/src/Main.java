@@ -149,6 +149,7 @@ public class Main {
                 }
 
             } else {
+                UserOperations userOperations = new UserOperations();
                 System.out.println("1- To request ride\n2- To Rate driver\n3- Logout");
                 choice = in.nextInt();
                 switch (choice) {
@@ -159,13 +160,13 @@ public class Main {
                         dest = in.next();
                         Area src = new Area(source);
                         Area destination = new Area(dest);
-                        user.requestRide(src, destination);
+                        userOperations.requestRide(user,src,destination);
                         System.out.println("1- Get available offers");
                         choice = in.nextInt();
                         switch (choice) {
                             case 1:
                                 while (choice > - 1) {
-                                    ArrayList<Offer> offers = user.getOffers();
+                                    ArrayList<Offer> offers = userOperations.getOffers();
                                     int RideId = 0;
                                     for (Offer offer : offers) {
                                         System.out.println(RideId++ + " " + offer.toString() + "\n" + offer.getOfferPrice() + "$");
@@ -187,7 +188,7 @@ public class Main {
                         if(stars > 5){
                             System.out.println("Rate a number from 1 to 5");
                         }else {
-                            user.rateDriver(uName, stars);
+                            userOperations.rateDriver(uName,stars);
                         }
                         break;
                     case 3:

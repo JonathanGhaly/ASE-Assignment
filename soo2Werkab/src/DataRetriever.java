@@ -1,5 +1,3 @@
-import javax.xml.transform.Result;
-import java.io.File;
 import java.sql.*;
 import java.util.ArrayList;
 
@@ -55,7 +53,7 @@ public class DataRetriever {
                     " Email          CHAR(50)  NULL , " +
                     " mobileNo         CHAR(11) NOT NULL ," +
                     "isSuspended SMALLINT ," +
-                    "create_time TEXT NULL ," +
+                    "createTime DEFAULT CURRENT_TIMESTAMP ," +
                     "UNIQUE(UserName))";
             stmt.executeUpdate(sql);
             stmt.close();
@@ -224,7 +222,7 @@ public class DataRetriever {
                     "(IDAccount INTEGER PRIMARY KEY     NOT NULL," +
                     " UserName       CHAR(50)    NOT NULL  , " +
                     " Password       CHAR(50)         NOT NULL, " +
-                    "create_time TEXT NULL ," +
+                    "createTime DEFAULT CURRENT_TIMESTAMP ," +
                     "UNIQUE(UserName))";
             stmt.executeUpdate(sql);
             stmt.close();
@@ -241,7 +239,7 @@ public class DataRetriever {
      * @param a Account object that hold its attributes
      */
     private void AccountRegister(Account a) {
-        String sql = "INSERT OR IGNORE INTO Accounts (IDAccount,UserName,Password,Email,mobileNo,isSuspended,create_time) VALUES (?,?,?,?,?,?,?)";
+        String sql = "INSERT OR IGNORE INTO Accounts (IDAccount,UserName,Password,Email,mobileNo,isSuspended) VALUES (?,?,?,?,?,?)";
         try (Connection conn = this.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             stmt = conn.createStatement();
@@ -322,7 +320,6 @@ public class DataRetriever {
             pstmt.setString(2, account.getUsername());
             pstmt.setString(3, account.getPassword());
             pstmt.executeUpdate();
-            conn.close();
         } catch (Exception e) {
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
             System.exit(0);
@@ -380,14 +377,13 @@ public class DataRetriever {
         String sql = "SELECT Password "
                 + " FROM AdminAccounts where UserName = ?";
         try (Connection conn = this.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql);
+             PreparedStatement pstmt = conn.prepareStatement(sql)
         ) {
             pstmt.setString(1, acc.username);
             ResultSet rs = pstmt.executeQuery();
             if (rs.getString("Password").equals(acc.password)) {
                 return true;
             }
-            conn.close();
         } catch (Exception e) {
             return false;
         }
@@ -412,8 +408,6 @@ public class DataRetriever {
             pstmt.setString(1, acc.username);
             ResultSet rs = pstmt.executeQuery();
             pstmt2.setInt(1, rs.getInt("IDAccount"));
-            ResultSet rs2 = pstmt2.executeQuery();
-            int id = rs2.getInt("DriverID");
             return true;
         } catch (Exception e) {
             return false;
@@ -430,16 +424,12 @@ public class DataRetriever {
         String sql = "SELECT IsVerified "
                 + " FROM DriverAccount where DriverID = ?";
         try (Connection conn = this.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql);
+             PreparedStatement pstmt = conn.prepareStatement(sql)
         ) {
             int id = this.getID(driver.account.getUsername());
             pstmt.setInt(1, id);
             ResultSet rs = pstmt.executeQuery();
-            if (rs.getBoolean("IsVerified")) {
-                return true;
-            } else {
-                return false;
-            }
+            return rs.getBoolean("IsVerified");
         } catch (Exception e) {
             return false;
         }
@@ -455,12 +445,11 @@ public class DataRetriever {
         String sql = "SELECT IDAccount,UserName,Password "
                 + " FROM AdminAccounts where UserName = ?";
         try (Connection conn = this.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql);
+             PreparedStatement pstmt = conn.prepareStatement(sql)
         ) {
             pstmt.setString(1, username);
             ResultSet rs = pstmt.executeQuery();
             Account account = new Account(rs.getString("UserName"), rs.getString("Password"), "", "");
-            Admin admin = new Admin(account);
             conn.close();
             return new Admin(account);
         } catch (Exception e) {
@@ -487,7 +476,6 @@ public class DataRetriever {
             ResultSet rs = pstmt.executeQuery();
             pstmt2.setInt(1, rs.getInt("IDAccount"));
             ResultSet rs2 = pstmt2.executeQuery();
-            int id = rs.getInt("IDAccount");
             Account account = new Account(rs.getString("UserName"), rs.getString("Password"), rs.getString("Email"), rs.getString("mobileNo"));
             Driver driver = new Driver(account, rs2.getString("NationalID"), rs2.getString("LicenceNo"), rs2.getBoolean("isVerified"), rs2.getBoolean("isAccepted"), rs2.getInt("Balance"));
             pstmt.close();
@@ -637,7 +625,7 @@ public class DataRetriever {
         String sql2 = "SELECT AreaName FROM Areas WHERE ID = ?;";
         try (Connection conn = this.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql);
-             PreparedStatement pstmt2 = conn.prepareStatement(sql2);
+             PreparedStatement pstmt2 = conn.prepareStatement(sql2)
         ) {
             stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sql), rs2;
@@ -702,7 +690,6 @@ public class DataRetriever {
             pstmt.setString(1, area.toString());
             pstmt.executeUpdate();
             stmt.close();
-            pstmt.close();
         } catch (Exception e) {
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
             System.exit(0);
@@ -743,7 +730,7 @@ public class DataRetriever {
     public void insertDriverFavoriteArea(Driver driver, Area area) {
         String sql = "INSERT OR IGNORE INTO FavoriteArea (AreaID,DriverID) Values(?,?)";
         try (Connection conn = this.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql);
+             PreparedStatement pstmt = conn.prepareStatement(sql)
         ) {
             stmt = conn.createStatement();
             pstmt.setInt(1, getAreaId(area));
@@ -841,7 +828,7 @@ public class DataRetriever {
         DriverOperations op = new DriverOperations();
         try (Connection conn = this.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql1);
-             PreparedStatement pstmt2 = conn.prepareStatement(sql2);
+             PreparedStatement pstmt2 = conn.prepareStatement(sql2)
         ) {
             pstmt2.setInt(1, ride.getRideID());
             ResultSet rs2 = pstmt2.executeQuery();
@@ -875,8 +862,8 @@ public class DataRetriever {
                     " WHERE DriverID = " + getID(driver.account.getUsername()) + ";";
             ResultSet rs = stmt.executeQuery(sql);
             Double rating = rs.getDouble("Rating");
-            Integer numRating = rs.getInt("NumOfRatings") + 1;
-            Double avgRate = (rate + rating) / numRating;
+            int numRating = rs.getInt("NumOfRatings") + 1;
+            double avgRate = (rate + rating) / numRating;
             psmt.setDouble(1, avgRate);
             psmt.setInt(2, numRating);
             psmt.setInt(3, getID(driver.account.getUsername()));
