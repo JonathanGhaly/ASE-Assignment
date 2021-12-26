@@ -5,10 +5,9 @@ public class CarRequest {
     boolean isAccepted;
     int carRequestID;
     Ride ride;
-
     User user;
     Area source, destination;
-    CarRequest(User user, Area source, Area destination) {
+    public CarRequest(User user, Area source, Area destination) {
         ride = new Ride(source, destination);
         ride.makeRide(source, destination);
         this.client=user;
@@ -18,7 +17,6 @@ public class CarRequest {
         db.makeCarRequest(this);
        // source.notify();
     }
-
     void setDriver(Driver driver){
         this.driver = driver;
         updateRequest();

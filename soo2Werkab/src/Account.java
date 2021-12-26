@@ -7,11 +7,16 @@ public class Account extends EventListener {
     private boolean isSuspended;
     private DataRetriever db;
 
+    /**
+     * This method is used to check if the phone number is valid in Egypt
+     * @param mobileNumber the phone number to check
+     * @return false if number is not valid true if valid
+     */
     private boolean validateMobileNumber(String mobileNumber) {
         if (mobileNumber.length() != 11) return false;
 
         String firstThree = mobileNumber.substring(0, 3);
-        if (!firstThree.equals("010") && !firstThree.equals("011") && !firstThree.equals("012")) return false;
+        if (!firstThree.equals("010") && !firstThree.equals("011") && !firstThree.equals("012") && !firstThree.equals("015")) return false;
         return true;
     }
 

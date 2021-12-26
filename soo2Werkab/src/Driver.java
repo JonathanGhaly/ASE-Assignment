@@ -11,7 +11,7 @@ public class Driver {
     Scanner sc;
     DataRetriever db = DataRetriever.getInstance();
 
-    Driver(Account account, String nationalID, String drivingLicenseNumber, boolean isVerified, boolean isAccepted, int balance) {
+    public Driver(Account account, String nationalID, String drivingLicenseNumber, boolean isVerified, boolean isAccepted, int balance) {
         this.account = account;
         this.nationalID = nationalID;
         this.drivingLicenseNumber = drivingLicenseNumber;

@@ -10,7 +10,7 @@ public class Area extends Publisher {
         this.areaName = areaName;
     }
 
-    Area(String areaName, Driver[] drivers) { // used in DB
+    public Area(String areaName, Driver[] drivers) { // used in DB
         this.areaName = areaName;
         this.drivers = new Driver[drivers.length];
         for (int i = 0; i < drivers.length; i++)

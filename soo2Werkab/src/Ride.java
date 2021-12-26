@@ -17,6 +17,10 @@ public class Ride extends Publisher {
         this.rideStatus = "Pending";
     }
 
+    /**
+     * method to change ride status from pending to inride and ended
+     * @param status the status of the ride to change to
+     */
     public void setRideStatus(String status) {
         this.rideStatus = status;
         db.updateRideStatus(this, status);
@@ -41,6 +45,12 @@ public class Ride extends Publisher {
     public int getRideID() {
         return rideID;
     }
+
+    /**
+     * Make ride and add it to the database
+     * @param sourceArea Area where the ride starts
+     * @param destinationArea Area where the ride will end
+     */
     void makeRide(Area sourceArea,Area destinationArea){
         this.sourceArea = sourceArea;
         this.destinationArea = destinationArea;

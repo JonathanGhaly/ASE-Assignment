@@ -4,6 +4,7 @@ public class Register {
     Account acc;
     boolean isDriver = false;
     DataRetriever data = DataRetriever.getInstance();
+
     public Register(Account account,boolean isDriver){
         acc=account;
         this.isDriver=isDriver;

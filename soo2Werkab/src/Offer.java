@@ -2,10 +2,10 @@ public class Offer {
     Integer offerPrice;
     Driver driver;
 
-    Offer() {
+    public Offer() {
     }
 
-    Offer(Integer offerPrice, Driver driver) {
+    public Offer(Integer offerPrice, Driver driver) {
         this.offerPrice = offerPrice;
         this.driver = driver;
     }

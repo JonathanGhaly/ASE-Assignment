@@ -3,7 +3,6 @@ public class Login {
     String username;
     String password;
     Boolean isDriver = false, isLoggedin = false, isAdmin = false;
-
     Driver c;
     User u;
     Admin admin;
@@ -28,19 +27,15 @@ public class Login {
     private Driver getDriver(String username) {
         return d.getDriver(username);
     }
-
     User getUser(String username) {
         return d.getUser(username);
     }
-
     User getUser() {
         return this.u;
     }
-
     Driver getDriver() {
         return this.c;
     }
-
     Boolean isDriver() {
         return this.isDriver;
     }
@@ -50,9 +45,7 @@ public class Login {
     Boolean getIsLoggedin() {
         return this.isLoggedin;
     }
-
     Admin getAdmin() {
         return d.getAdmin(this.username);
     }
-
 }
