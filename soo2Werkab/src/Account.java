@@ -1,9 +1,14 @@
+import java.sql.Date;
+import java.sql.Timestamp;
+
+
 public class Account extends EventListener {
 
     private String username;
     private String password;
     private String email;
     private String mobileNumber;
+    private Date birthDate;
     private boolean isSuspended;
     private DataRetriever db;
     /**
@@ -23,6 +28,15 @@ public class Account extends EventListener {
         this.password = password;
         this.email = email;
         this.mobileNumber = mobileNumber;
+        isSuspended = false;
+        db = DataRetriever.getInstance();
+    }
+    public Account(String username, String password, String email, String mobileNumber, Date birthDate) {
+        this.username = username;
+        this.password = password;
+        this.email = email;
+        this.mobileNumber = mobileNumber;
+        this.birthDate = birthDate;
         isSuspended = false;
         db = DataRetriever.getInstance();
     }

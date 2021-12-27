@@ -53,6 +53,7 @@ public class DataRetriever {
                     " Email          CHAR(50)  NULL , " +
                     " mobileNo         CHAR(11) NOT NULL ," +
                     "isSuspended SMALLINT ," +
+                    "BirthDate TIMESTAMP DEFAULT NULL ," +
                     "createTime DEFAULT CURRENT_TIMESTAMP ," +
                     "UNIQUE(UserName))";
             stmt.executeUpdate(sql);
@@ -397,18 +398,17 @@ public class DataRetriever {
      * @return true if it is found in DriverAccount table
      */
     Boolean isDriver(Login acc) {
-        String sql = "SELECT IDAccount "
-                + " FROM Accounts where UserName = ?";
-        String sql2 = "SELECT DriverID " +
+        String sql = "SELECT DriverID " +
                 "FROM DriverAccount where DriverID = ?";
         try (Connection conn = this.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql);
-             PreparedStatement pstmt2 = conn.prepareStatement(sql2)
+             PreparedStatement pstmt = conn.prepareStatement(sql)
         ) {
-            pstmt.setString(1, acc.username);
+            pstmt.setInt(1, getID(acc.username));
             ResultSet rs = pstmt.executeQuery();
-            pstmt2.setInt(1, rs.getInt("IDAccount"));
-            return true;
+            while (rs.next()){
+                return getID(acc.username) == rs.getInt("DriverID");
+            }
+            return false;
         } catch (Exception e) {
             return false;
         }
@@ -494,13 +494,14 @@ public class DataRetriever {
      * @return User object
      */
     User getUser(String username) {
-        String sql = "SELECT IDAccount,UserName,Password,Email,mobileNo "
+        String sql = "SELECT IDAccount,UserName,Password,Email,mobileNo,BirthDate "
                 + " FROM Accounts where UserName = ?";
         try (Connection conn = this.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)
         ) {
             pstmt.setString(1, username);
             ResultSet rs = pstmt.executeQuery();
+//            Date birth = rs.getTimestamp("BirthDate");
             Account account = new Account(rs.getString("UserName"), rs.getString("Password"), rs.getString("Email"), rs.getString("mobileNo"));
             User ret = new User(account);
             pstmt.close();

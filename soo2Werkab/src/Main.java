@@ -1,3 +1,4 @@
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -9,7 +10,9 @@ public class Main {
     static User user = null;
     static Admin admin = null;
     static Scanner in = new Scanner(System.in);
-    static String username, password, email, phoneNo, source, dest;
+    static String username, password, email, phoneNo, source, dest,birthDayString;
+    static  Long birthDate;
+    static Date BirthDay;
     static double offer = 0;
 
     public static void main(String[] args) {
@@ -45,12 +48,17 @@ public class Main {
                 email = in.nextLine();
                 System.out.println("Please enter the phone number: ");
                 phoneNo = in.next();
-                Account acc = new Account(username, password, email, phoneNo);
+                System.out.println("Please enter Your BirthDate Day/Month/Year: ");
+//                birthDate = in.nextLong();
+//
+//                BirthDay = new Date();
+                Account acc = new Account(username, password, email, phoneNo); //TODO figure Birthday
                 System.out.println("1- To register as user\n2- To register as driver");
                 choice = in.nextInt();
                 switch (choice) {
                     case 1:
                         Register r = new Register(acc, false);
+                        isDriver=false;
                         break;
                     case 2:
                         r = new Register(acc, true);
