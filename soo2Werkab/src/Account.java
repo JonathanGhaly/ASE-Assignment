@@ -1,5 +1,5 @@
-import java.sql.Date;
-import java.sql.Timestamp;
+import java.util.Date;
+
 
 
 public class Account extends EventListener {
@@ -86,5 +86,9 @@ public class Account extends EventListener {
     @Override
     public void update(){
         
+    }
+
+    public Date getBirthDate() {
+        return birthDate;
     }
 }

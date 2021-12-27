@@ -240,7 +240,7 @@ public class DataRetriever {
      * @param a Account object that hold its attributes
      */
     private void AccountRegister(Account a) {
-        String sql = "INSERT OR IGNORE INTO Accounts (IDAccount,UserName,Password,Email,mobileNo,isSuspended) VALUES (?,?,?,?,?,?)";
+        String sql = "INSERT OR IGNORE INTO Accounts (IDAccount,UserName,Password,Email,mobileNo,isSuspended,BirthDate) VALUES (?,?,?,?,?,?,?)";
         try (Connection conn = this.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             stmt = conn.createStatement();
@@ -252,6 +252,7 @@ public class DataRetriever {
             pstmt.setString(4, a.getEmail());
             pstmt.setString(5, a.getMobileNumber());
             pstmt.setInt(6, 0);
+            pstmt.setTimestamp(7,new Timestamp(a.getBirthDate().getTime()));
             pstmt.executeUpdate();
         } catch (Exception e) {
             System.err.println(e.getClass().getName() + ": " + e.getMessage());

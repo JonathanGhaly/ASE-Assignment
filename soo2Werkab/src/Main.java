@@ -1,4 +1,7 @@
-import java.sql.Date;
+import java.sql.Timestamp;
+import java.util.Date;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -11,7 +14,6 @@ public class Main {
     static Admin admin = null;
     static Scanner in = new Scanner(System.in);
     static String username, password, email, phoneNo, source, dest,birthDayString;
-    static  Long birthDate;
     static Date BirthDay;
     static double offer = 0;
 
@@ -48,11 +50,15 @@ public class Main {
                 email = in.nextLine();
                 System.out.println("Please enter the phone number: ");
                 phoneNo = in.next();
-                System.out.println("Please enter Your BirthDate Day/Month/Year: ");
-//                birthDate = in.nextLong();
-//
-//                BirthDay = new Date();
-                Account acc = new Account(username, password, email, phoneNo); //TODO figure Birthday
+                System.out.println("Please enter Your BirthDate Year/Month/Day: ");
+                birthDayString = in.next();
+                try {
+                    BirthDay = new SimpleDateFormat("yyyy/MM/dd").parse(birthDayString);
+
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+                Account acc = new Account(username, password, email, phoneNo,BirthDay); //TODO figure Birthday
                 System.out.println("1- To register as user\n2- To register as driver");
                 choice = in.nextInt();
                 switch (choice) {
