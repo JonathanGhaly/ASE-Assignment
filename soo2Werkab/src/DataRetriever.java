@@ -646,6 +646,28 @@ public class DataRetriever {
     }
 
     /**
+     * Get list of unverified drivers to admin
+     *
+     * @return ArrayList of unverified drivers
+     */
+    public ArrayList <String> getNotVerifiedDriver(){
+        ArrayList<String> drivers = new ArrayList<>();
+        String sql = "SELECT UserName FROM Accounts Where IDAccount = (SELECT DriverID FROM DriverAccount WHERE IsVerified = 0)";
+
+        try (Connection conn = this.connect()){
+            stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
+            while (rs.next()){
+                drivers.add(rs.getString("UserName"));
+            }
+        }catch (Exception e){
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        }
+        return drivers;
+    }
+
+    /**
      * Get list of rides where its source is a favorite area for the driver
      *
      * @param driver Driver object who want to list all rides from his favorite area

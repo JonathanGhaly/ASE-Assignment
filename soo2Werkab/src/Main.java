@@ -85,29 +85,7 @@ public class Main {
         }
         while (isLoggedIn) {
             if (isAdmin) {
-                System.out.println("1- Verify Driver\n2- Suspend user\n3- Unsuspend user\n4- logout");
-                int choice = in.nextInt();
-                switch (choice) {
-                    case 1:
-                        System.out.println("Enter driver's username");
-                        username = in.next();
-                        admin.verifyDriver(username);
-                        break;
-                    case 2:
-                        System.out.println("Enter username");
-                        username = in.next();
-                        admin.suspend(username, 1);
-                        break;
-                    case 3:
-                        System.out.println("Enter username");
-                        username = in.next();
-                        admin.suspend(username, 0);
-                        break;
-                    case 4:
-                        return;
-                    default:
-                        System.out.println("Wrong command");
-                }
+                AdminUI ui = new AdminUI(admin);
             } else if (isDriver) {
                 driverOperations = new DriverOperations();
                 System.out.println("1- Set favorite area\n2- List favorite areas\n3- List favorite rides available\n4- Show my rating\n5- Remove favorite area\n6- Logout");
