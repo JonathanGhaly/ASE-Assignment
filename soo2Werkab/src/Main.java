@@ -117,6 +117,7 @@ public class Main {
                                         Double offerPrice = in.nextDouble();
                                         Offer offer = new Offer(offerPrice, driver);
                                         driverOperations.sendOffer(driver,ride, offerPrice);
+                                        choice = 0;
                                     }
                                 }
                             }

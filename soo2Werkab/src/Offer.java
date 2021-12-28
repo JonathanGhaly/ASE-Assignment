@@ -1,7 +1,7 @@
 public class Offer {
     Double offerPrice;
     Driver driver;
-
+    DataRetriever db = DataRetriever.getInstance();
     public Offer() {
     }
 
@@ -16,4 +16,5 @@ public class Offer {
     public double getOfferPrice(){
         return this.offerPrice;
     }
+    public double getAvgRating(){return db.calAvgRating(this.driver);}
 }
