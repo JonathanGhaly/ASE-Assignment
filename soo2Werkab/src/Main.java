@@ -58,7 +58,7 @@ public class Main {
                 } catch (ParseException e) {
                     e.printStackTrace();
                 }
-                Account acc = new Account(username, password, email, phoneNo,BirthDay); //TODO figure Birthday
+                Account acc = new Account(username, password, email, phoneNo,BirthDay);
                 System.out.println("1- To register as user\n2- To register as driver");
                 choice = in.nextInt();
                 switch (choice) {
