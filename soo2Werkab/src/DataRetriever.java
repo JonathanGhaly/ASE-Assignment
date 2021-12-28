@@ -91,7 +91,7 @@ public class DataRetriever {
             stmt = c.createStatement();
             String sql = "CREATE TABLE IF NOT EXISTS UserAccounts " +
                     "(AccountID INTEGER ," +
-                    " UserStatus   TEXT CHECK( UserStatus IN ('Inactive','InRide','Pending','idle') )   NOT NULL DEFAULT 'idle'," +
+                    " UserStatus   TEXT CHECK( UserStatus IN ('Offline','InRide','Pending','idle') )   NOT NULL DEFAULT 'idle'," +
                     "FOREIGN KEY(AccountID)  REFERENCES Accounts(IDAccount))";
             stmt.executeUpdate(sql);
             stmt.close();
@@ -113,7 +113,7 @@ public class DataRetriever {
                     "NationalID Char(50) NOT NULL ," +
                     "IsVerified SMALLINT DEFAULT 0," +
                     "IsAccepted SMALLINT DEFAULT 0," +
-                    "Rating REAL DEFAULT 0," +
+                    "AvgRating REAL DEFAULT 0," +
                     "NumOfRatings INTEGER DEFAULT 0," +
                     "DriverStatus   TEXT CHECK( DriverStatus IN ('Inactive','InRide','Pending','idle') )   NOT NULL DEFAULT 'idle'," +
                     "Balance INTEGER DEFAULT 0," +
@@ -137,7 +137,7 @@ public class DataRetriever {
                     "(DriverID INTEGER ," +
                     "DriverName CHAR(50) NOT NULL ," +
                     "RideID INTEGER NOT NULL ," +
-                    "Rating DOUBLE NOT NULL ," +
+                    "Rating REAL NOT NULL ," +
                     "Price INTEGER NOT NULL," +
                     "FOREIGN KEY(DriverName)  REFERENCES Accounts(UserName)," +
                     "FOREIGN KEY(DriverID)  REFERENCES DriverAccount(DriverID)," +
@@ -202,6 +202,7 @@ public class DataRetriever {
                     "RideID INTEGER ," +
                     "driverOffer DOUBLE NULL," +
                     "isAccepted SMALLINT NULL ," +
+                    "createTime DEFAULT CURRENT_TIMESTAMP ," +
                     "FOREIGN KEY(DriverID)  REFERENCES DriverAccount(DriverID)," +
                     "FOREIGN KEY(CustomerID) REFERENCES UserAccounts(AccountID)," +
                     "FOREIGN KEY(RideID) REFERENCES Rides(IDRides))";
@@ -233,7 +234,26 @@ public class DataRetriever {
             System.exit(0);
         }
     }
-
+    public void RatingDB() {
+        try {
+            Class.forName("org.sqlite.JDBC");
+            c = DriverManager.getConnection("jdbc:sqlite:soo2Werkab.db");
+            stmt = c.createStatement();
+            String sql = "CREATE TABLE IF NOT EXISTS Ratings " +
+                    "(UserID INTEGER NOT NULL ," +
+                    "DriverID INTEGER NOT NULL,"+
+                    "Rating       Integer    NOT NULL  , " +
+                    "createTime DEFAULT CURRENT_TIMESTAMP ,"+
+                    "FOREIGN KEY (UserID) REFERENCES  UserAccounts(UserID) )"
+                    ;
+            stmt.executeUpdate(sql);
+            stmt.close();
+            c.close();
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        }
+    }
     /**
      * Add Account attributes to database by Account object if not exist
      *
@@ -569,14 +589,16 @@ public class DataRetriever {
      * @param driverID ID of the driver to get his rating
      * @return rating (double)
      */
-    double getRating(int driverID) {
-        String sql = "select Rating from DriverAccount where DriverID = ?;";
-        double rate = 0;
+    ArrayList<Integer> getRating(int driverID) {
+        String sql = "select Rating from Ratings where DriverID = ?;";
+        ArrayList<Integer> rate = new ArrayList<>();
         try (Connection conn = this.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, driverID);
             ResultSet rs = pstmt.executeQuery();
-            rate = rs.getInt("Rating");
+            while (rs.next()){
+                rate.add(rs.getInt("Rating"));
+            }
             pstmt.close();
             pstmt.close();
             c.close();
@@ -590,20 +612,18 @@ public class DataRetriever {
     /**
      * Method for user to get all drivers offer for his ride
      *
-     * @param carRequest Request object of the ride
+     * @param user the user who ordered the ride
      * @return ArrayList of offers
      */
-    public ArrayList<Offer> getDriverOffer(CarRequest carRequest) {
+    public ArrayList<Offer> getDriverOffer(User user) {
         ArrayList<Offer> offers = new ArrayList<>();
         try (Connection conn = this.connect()) {
             stmt = conn.createStatement();
             String sql = "SELECT DriverID,DriverName,Rating,Price FROM Offers " +
-                    "Where RideID = " + carRequest.ride.getRideID() + ";";
+                    "Where RideID = (SELECT RideID FROM Requests WHERE CustomerID = "+this.getID(user.account.getUsername())+");";
             ResultSet rs = stmt.executeQuery(sql);
             while (rs.next()) {
-                Double price = rs.getDouble("Price");
-                carRequest.driver = getDriver(rs.getString("DriverName"));
-                Offer offer = new Offer(price, carRequest.driver);
+                Offer offer = new Offer(rs.getDouble("Price"), getDriver(rs.getString("DriverName")));
                 offers.add(offer);
             }
             stmt.close();
@@ -846,7 +866,7 @@ public class DataRetriever {
      */
     //TODO Check its functionality
     public void makeDriverOffer(Driver carDriver, Double offer, Ride ride) {
-        String sql1 = "INSERT OR IGNORE INTO Offers (DriverID,DriverName,RideID,Rating,Price) VALUES (?,?,?,?,?)";
+        String sql1 = "INSERT INTO Offers (DriverID,DriverName,RideID,Rating,Price) VALUES (?,?,?,?,?)";
         String sql2 = "SELECT RideID,CustomerID FROM Requests WHERE " +
                 "RideID = ?;";
         DriverOperations op = new DriverOperations();
@@ -856,10 +876,10 @@ public class DataRetriever {
         ) {
             pstmt2.setInt(1, ride.getRideID());
             ResultSet rs2 = pstmt2.executeQuery();
-            pstmt.setInt(1, rs2.getInt(this.getID(carDriver.account.getUsername())));
+            pstmt.setInt(1, this.getID(carDriver.account.getUsername()));
             pstmt.setString(2, carDriver.account.getUsername());
             pstmt.setInt(3, rs2.getInt("RideID"));
-            pstmt.setDouble(4, op.showRating(carDriver));
+            pstmt.setDouble(4, calAvgRating(carDriver));
             pstmt.setDouble(5, offer);
             pstmt.executeUpdate();
             pstmt.close();
@@ -876,21 +896,17 @@ public class DataRetriever {
      * @param driver to be rated
      * @param rate   Rating of driver from user from 1 -> 5
      */
-    public void rateDriver(Driver driver, Double rate) {
-        String pstmtSql = "UPDATE DriverAccount SET Rating= ? ,NumOfRatings = ? WHERE DriverID = ?;";
+    public void rateDriver(User user,Driver driver, int rate) {
+        String pstmtSql = "INSERT OR IGNORE INTO Ratings SET UserID, Rating= ?, DriverID = ?;";
         try (Connection conn = this.connect();
              PreparedStatement psmt = conn.prepareStatement(pstmtSql)
         ) {
             stmt = conn.createStatement();
-            String sql = "SELECT Rating,NumOfRatings FROM DriverAccount" +
-                    " WHERE DriverID = " + getID(driver.account.getUsername()) + ";";
-            ResultSet rs = stmt.executeQuery(sql);
-            Double rating = rs.getDouble("Rating");
-            int numRating = rs.getInt("NumOfRatings") + 1;
-            double avgRate = (rate + rating) / numRating;
-            psmt.setDouble(1, avgRate);
-            psmt.setInt(2, numRating);
-            psmt.setInt(3, getID(driver.account.getUsername()));
+            psmt.setInt(1,getID(user.account.getUsername()));
+            psmt.setInt(2,rate);
+            psmt.setInt(3,getID(driver.account.getUsername()));
+            String sql = "UPDATE DriverAccount SET AvgRatings = "+this.calAvgRating(driver);
+            stmt.executeUpdate(sql);
             psmt.executeUpdate();
             stmt.close();
             c.close();
@@ -978,7 +994,32 @@ public class DataRetriever {
         this.offersDB();
         this.AreaDB();
         this.favoriteAreaDB();
+        this.RatingDB();
     }
-
+ public double calAvgRating(Driver driver){
+     double avgRatings = 0.0;
+     int sum=0;
+     String sql = "SELECT Rating FROM Ratings WHERE DriverID = ?";
+     try (Connection conn = this.connect();
+          PreparedStatement psmt = conn.prepareStatement(sql)
+     ) {
+         ArrayList <Integer> ratings = new ArrayList<>();
+        psmt.setInt(1,getID(driver.account.getUsername()));
+        ResultSet rs = psmt.executeQuery();
+        while(rs.next()){
+            ratings.add(rs.getInt("Rating"));
+        }
+        if(!ratings.isEmpty()){
+            for(int rating : ratings){
+                sum+=rating;
+            }
+            avgRatings = (double) sum/ratings.size();
+        }
+     }catch (Exception e){
+         System.err.println(e.getClass().getName() + ": " + e.getMessage());
+         System.exit(0);
+     }
+     return avgRatings;
+ }
 
 }

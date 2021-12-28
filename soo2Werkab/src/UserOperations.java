@@ -8,15 +8,15 @@ public class UserOperations {
         if (currentRequest == null)
             currentRequest = new CarRequest(user, source, destination);
     }
-    ArrayList<Offer> getOffers(){
-        return db.getDriverOffer(this.currentRequest);
+    ArrayList<Offer> getOffers(User user){
+        return db.getDriverOffer(user);
     }
 
     void reviewOffers() {
     }
 
-    void rateDriver(String driverName,double rating) {
-        db.rateDriver(db.getDriver(driverName), rating);
+    void rateDriver(User user,String driverName,int rating) {
+        db.rateDriver(user,db.getDriver(driverName), rating);
         }
 
     Double getDriverRating() {

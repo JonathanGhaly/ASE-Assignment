@@ -5,7 +5,7 @@ public class DriverOperations {
     Scanner sc = new Scanner(System.in);
     DataRetriever db = DataRetriever.getInstance();
 
-    Double showRating(Driver driver) {
+    ArrayList<Integer> showRating(Driver driver) {
         return db.getRating(db.getID(driver.account.getUsername()));
     }
 

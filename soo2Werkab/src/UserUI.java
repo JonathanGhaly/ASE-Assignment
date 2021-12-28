@@ -7,7 +7,7 @@ public class UserUI {
     String username,source,dest;
     UserUI(User user){
         UserOperations userOperations = new UserOperations();
-        System.out.println("1- To request ride\n2- To Rate driver\n3- Logout");
+        System.out.println("1- Request ride\n2- Get offers \n3- To Rate driver\n4- Logout");
         choice = in.nextInt();
         switch (choice) {
             case 1: {
@@ -27,8 +27,8 @@ public class UserUI {
                 switch (choice) {
                     case 1:
                         while (choice > - 1) {
-                            ArrayList<Offer> offers = userOperations.getOffers();
-                            int RideId = 0;
+                            ArrayList<Offer> offers = userOperations.getOffers(user);
+                            int RideId = 1;
                             for (Offer offer : offers) {
                                 System.out.println(RideId++ + " " + offer.toString() + "\n" + offer.getOfferPrice() + "$");
                             }
@@ -45,6 +45,21 @@ public class UserUI {
             }
             case 2:
                 System.out.println("=======================================");
+                while (choice > - 1) {
+                    ArrayList<Offer> offers = userOperations.getOffers(user);
+                    int RideId = 1;
+                    for (Offer offer : offers) {
+                        System.out.println("===================================================");
+                        System.out.println(RideId++ + "- Driver: " + offer.toString() + "\nPrice: " + offer.getOfferPrice() + "$\nRating: "+offer.getAvgRating());
+                        System.out.println("===================================================");
+                    }
+                    System.out.println("Enter 0 to refresh list or -1 to exit");
+                    choice = in.nextInt();
+                }
+                System.out.println("=======================================");
+                break;
+            case 3:
+                System.out.println("=======================================");
                 System.out.println("Please Enter driver username");
                 String uName = in.next();
                 System.out.println("Please enter the number of stars");
@@ -52,11 +67,11 @@ public class UserUI {
                 if(stars > 5 && stars < 1){
                     System.out.println("Rate a number from 1 to 5");
                 }else {
-                    userOperations.rateDriver(uName,stars);
+                    userOperations.rateDriver(user,uName,stars);
                 }
                 System.out.println("=======================================");
                 break;
-            case 3:
+            case 4:
                 System.out.println("=======================================");
                 System.out.println("Logging out");
                 System.out.println("=======================================");
