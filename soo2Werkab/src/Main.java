@@ -141,55 +141,7 @@ public class Main {
                 }
 
             } else {
-                UserOperations userOperations = new UserOperations();
-                System.out.println("1- To request ride\n2- To Rate driver\n3- Logout");
-                choice = in.nextInt();
-                switch (choice) {
-                    case 1: {
-                        System.out.println("Please enter the source: ");
-                        source = in.next();
-                        System.out.println("Please enter the destination");
-                        dest = in.next();
-                        Area src = new Area(source);
-                        Area destination = new Area(dest);
-                        userOperations.requestRide(user,src,destination);
-                        System.out.println("1- Get available offers");
-                        choice = in.nextInt();
-                        switch (choice) {
-                            case 1:
-                                while (choice > - 1) {
-                                    ArrayList<Offer> offers = userOperations.getOffers();
-                                    int RideId = 0;
-                                    for (Offer offer : offers) {
-                                        System.out.println(RideId++ + " " + offer.toString() + "\n" + offer.getOfferPrice() + "$");
-                                    }
-                                    System.out.println("Enter 0 to refresh list or -1 to exit");
-                                    choice = in.nextInt();
-                                }
-                                break;
-                            default:
-                                System.out.println("Wrong command");
-                        }
-                        break;
-                    }
-                    case 2:
-                        System.out.println("Please Enter driver username");
-                        String uName = in.next();
-                        System.out.println("Please enter the number of stars");
-                        int stars = in.nextInt();
-                        if(stars > 5){
-                            System.out.println("Rate a number from 1 to 5");
-                        }else {
-                            userOperations.rateDriver(uName,stars);
-                        }
-                        break;
-                    case 3:
-                        return;
-
-                    default:
-                        System.out.println("Wrong username");
-                }
-
+                UserUI ui = new UserUI(user);
             }
         }
     }
