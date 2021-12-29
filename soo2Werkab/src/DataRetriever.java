@@ -199,8 +199,8 @@ public class DataRetriever {
             String sql = "CREATE TABLE IF NOT EXISTS Logger" +
                     "(EventType CHAR(50) NOT NULL ," +
                     "RideID INTEGER ," +
-                    "DateTime CHAR(50) )" +
-                    "FOREIGN KEY (RideID) REFERENCES Rides(IDRides)";
+                    "DateTime CHAR(50) , " +
+                    "FOREIGN KEY(RideID) REFERENCES Rides(IDRides) )";
             stmt.executeUpdate(sql);
             stmt.close();
             c.close();
@@ -869,6 +869,22 @@ public class DataRetriever {
         }
     }
 
+    public void logEvent(String type, int rideID, String time){
+        String sql = "INSERT INTO Logger (EventType,RideID,DateTime) VAlUES (?,?,?)";
+        try (Connection conn = this.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)){
+            pstmt.setString(1, type);
+            pstmt.setInt(2, rideID);
+            pstmt.setString(3, time);
+            pstmt.executeUpdate();
+            pstmt.close();
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        }
+    }
+
+
     /**
      * Insert to Requests database carRequest attributes if exists Ignore
      *
@@ -1039,6 +1055,7 @@ public class DataRetriever {
         this.AreaDB();
         this.favoriteAreaDB();
         this.RatingDB();
+        this.LoggerDB();
     }
 
     public double calAvgRating(Driver driver) {

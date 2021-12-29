@@ -1,9 +1,11 @@
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Scanner;
 
 public class DriverOperations {
     Scanner sc = new Scanner(System.in);
     DataRetriever db = DataRetriever.getInstance();
+    Logger logger = Logger.getInstance();
 
     ArrayList<Integer> showRating(Driver driver) {
         return db.getRating(db.getID(driver.account.getUsername()));
@@ -31,6 +33,7 @@ public class DriverOperations {
 
     public void sendOffer(Driver driver, Ride ride, Double offer) {
         db.makeDriverOffer(driver, offer, ride);
+        logger.log(new Event(EventType.CaptainSetPrice, ride.rideID, Calendar.getInstance()));
     }
 
     public ArrayList<Ride> listAllRides(Driver driver) {
