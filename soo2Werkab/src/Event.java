@@ -1,9 +1,20 @@
-public class Event {
-    String eventInfo,eventSender,eventReceiver;
+import java.util.Calendar;
+import java.util.SimpleTimeZone;
 
-    Event(String eventName,Account sender,Account receiver){
-    this.eventInfo=eventName;
-    this.eventSender=sender.getUsername();
-    this.eventReceiver=receiver.getUsername();
+public class Event {
+    String type;
+    int rideID;
+    String time;
+
+    Event(EventType eventType, int rideID, Calendar time){
+        this.type = eventType.toString();
+        this.rideID = rideID;
+        this.time = time.toString();
     }
+    Event(EventType eventType, int rideID, String time){
+        this.type = eventType.toString();
+        this.rideID = rideID;
+        this.time = time;
+    }
+
 }

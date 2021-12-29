@@ -1,3 +1,4 @@
+import java.awt.image.AreaAveragingScaleFilter;
 import java.sql.*;
 import java.util.ArrayList;
 
@@ -190,6 +191,25 @@ public class DataRetriever {
         }
     }
 
+    public void LoggerDB() {
+        try {
+            Class.forName("org.sqlite.JDBC");
+            c = DriverManager.getConnection("jdbc:sqlite:soo2Werkab.db");
+            stmt = c.createStatement();
+            String sql = "CREATE TABLE IF NOT EXISTS Logger" +
+                    "(EventType CHAR(50) NOT NULL ," +
+                    "RideID INTEGER ," +
+                    "DateTime CHAR(50) )" +
+                    "FOREIGN KEY (RideID) REFERENCES Rides(IDRides)";
+            stmt.executeUpdate(sql);
+            stmt.close();
+            c.close();
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        }
+    }
+
     public void RequestDB() {
         try {
             Class.forName("org.sqlite.JDBC");
@@ -234,6 +254,7 @@ public class DataRetriever {
             System.exit(0);
         }
     }
+
     public void RatingDB() {
         try {
             Class.forName("org.sqlite.JDBC");
@@ -241,11 +262,10 @@ public class DataRetriever {
             stmt = c.createStatement();
             String sql = "CREATE TABLE IF NOT EXISTS Ratings " +
                     "(UserID INTEGER NOT NULL ," +
-                    "DriverID INTEGER NOT NULL,"+
+                    "DriverID INTEGER NOT NULL," +
                     "Rating       Integer    NOT NULL  , " +
-                    "createTime DEFAULT CURRENT_TIMESTAMP ,"+
-                    "FOREIGN KEY (UserID) REFERENCES  UserAccounts(UserID) )"
-                    ;
+                    "createTime DEFAULT CURRENT_TIMESTAMP ," +
+                    "FOREIGN KEY (UserID) REFERENCES  UserAccounts(UserID) )";
             stmt.executeUpdate(sql);
             stmt.close();
             c.close();
@@ -254,6 +274,7 @@ public class DataRetriever {
             System.exit(0);
         }
     }
+
     /**
      * Add Account attributes to database by Account object if not exist
      *
@@ -272,7 +293,7 @@ public class DataRetriever {
             pstmt.setString(4, a.getEmail());
             pstmt.setString(5, a.getMobileNumber());
             pstmt.setInt(6, 0);
-            pstmt.setTimestamp(7,new Timestamp(a.getBirthDate().getTime()));
+            pstmt.setTimestamp(7, new Timestamp(a.getBirthDate().getTime()));
             pstmt.executeUpdate();
         } catch (Exception e) {
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
@@ -426,7 +447,7 @@ public class DataRetriever {
         ) {
             pstmt.setInt(1, getID(acc.username));
             ResultSet rs = pstmt.executeQuery();
-            while (rs.next()){
+            while (rs.next()) {
                 return getID(acc.username) == rs.getInt("DriverID");
             }
             return false;
@@ -540,7 +561,7 @@ public class DataRetriever {
      * @return Account ID
      */
     public int getID(String username) {
-        int id = - 1;
+        int id = -1;
         String sql = "SELECT IDAccount FROM Accounts Where UserName = ?";
         try (Connection conn = this.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -567,7 +588,7 @@ public class DataRetriever {
     public int getAreaId(Area area) {
         this.addArea(area);
         String sql = "SELECT ID FROM Areas where AreaName = ?" + ";";
-        int id = - 1;
+        int id = -1;
         try (Connection conn = this.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)
         ) {
@@ -596,7 +617,7 @@ public class DataRetriever {
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, driverID);
             ResultSet rs = pstmt.executeQuery();
-            while (rs.next()){
+            while (rs.next()) {
                 rate.add(rs.getInt("Rating"));
             }
             pstmt.close();
@@ -607,6 +628,28 @@ public class DataRetriever {
             System.exit(0);
         }
         return rate;
+    }
+
+    ArrayList<Event> getEventsOfRide(int rideID) {
+        ArrayList<Event> events = new ArrayList<>();
+        String sql = "Select EventType,RideID,DateTime FROM Logger" +
+                "Where RideID = " + rideID;
+        try (Connection conn = this.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                events.add(new Event((EventType) rs.getObject("EventType")
+                        ,rs.getInt("RideID"),
+                        rs.getString("DateTime") ));
+            }
+            pstmt.close();
+            pstmt.close();
+            c.close();
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        }
+        return events;
     }
 
     /**
@@ -620,7 +663,7 @@ public class DataRetriever {
         try (Connection conn = this.connect()) {
             stmt = conn.createStatement();
             String sql = "SELECT DriverID,DriverName,Rating,Price FROM Offers " +
-                    "Where RideID = (SELECT RideID FROM Requests WHERE CustomerID = "+this.getID(user.account.getUsername())+");";
+                    "Where RideID = (SELECT RideID FROM Requests WHERE CustomerID = " + this.getID(user.account.getUsername()) + ");";
             ResultSet rs = stmt.executeQuery(sql);
             while (rs.next()) {
                 Offer offer = new Offer(rs.getDouble("Price"), getDriver(rs.getString("DriverName")));
@@ -670,17 +713,17 @@ public class DataRetriever {
      *
      * @return ArrayList of unverified drivers
      */
-    public ArrayList <String> getNotVerifiedDriver(){
+    public ArrayList<String> getNotVerifiedDriver() {
         ArrayList<String> drivers = new ArrayList<>();
         String sql = "SELECT UserName FROM Accounts Where IDAccount = (SELECT DriverID FROM DriverAccount WHERE IsVerified = 0)";
 
-        try (Connection conn = this.connect()){
+        try (Connection conn = this.connect()) {
             stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
-            while (rs.next()){
+            while (rs.next()) {
                 drivers.add(rs.getString("UserName"));
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
             System.exit(0);
         }
@@ -896,16 +939,16 @@ public class DataRetriever {
      * @param driver to be rated
      * @param rate   Rating of driver from user from 1 -> 5
      */
-    public void rateDriver(User user,Driver driver, int rate) {
+    public void rateDriver(User user, Driver driver, int rate) {
         String pstmtSql = "INSERT OR IGNORE INTO Ratings SET UserID, Rating= ?, DriverID = ?;";
         try (Connection conn = this.connect();
              PreparedStatement psmt = conn.prepareStatement(pstmtSql)
         ) {
             stmt = conn.createStatement();
-            psmt.setInt(1,getID(user.account.getUsername()));
-            psmt.setInt(2,rate);
-            psmt.setInt(3,getID(driver.account.getUsername()));
-            String sql = "UPDATE DriverAccount SET AvgRatings = "+this.calAvgRating(driver);
+            psmt.setInt(1, getID(user.account.getUsername()));
+            psmt.setInt(2, rate);
+            psmt.setInt(3, getID(driver.account.getUsername()));
+            String sql = "UPDATE DriverAccount SET AvgRatings = " + this.calAvgRating(driver);
             stmt.executeUpdate(sql);
             psmt.executeUpdate();
             stmt.close();
@@ -982,7 +1025,6 @@ public class DataRetriever {
     }
 
 
-
     /**
      * Build soo2Werkab Database tables
      */
@@ -998,30 +1040,31 @@ public class DataRetriever {
         this.favoriteAreaDB();
         this.RatingDB();
     }
- public double calAvgRating(Driver driver){
-     double avgRatings = 0.0;
-     int sum=0;
-     String sql = "SELECT Rating FROM Ratings WHERE DriverID = ?";
-     try (Connection conn = this.connect();
-          PreparedStatement psmt = conn.prepareStatement(sql)
-     ) {
-         ArrayList <Integer> ratings = new ArrayList<>();
-        psmt.setInt(1,getID(driver.account.getUsername()));
-        ResultSet rs = psmt.executeQuery();
-        while(rs.next()){
-            ratings.add(rs.getInt("Rating"));
-        }
-        if(!ratings.isEmpty()){
-            for(int rating : ratings){
-                sum+=rating;
+
+    public double calAvgRating(Driver driver) {
+        double avgRatings = 0.0;
+        int sum = 0;
+        String sql = "SELECT Rating FROM Ratings WHERE DriverID = ?";
+        try (Connection conn = this.connect();
+             PreparedStatement psmt = conn.prepareStatement(sql)
+        ) {
+            ArrayList<Integer> ratings = new ArrayList<>();
+            psmt.setInt(1, getID(driver.account.getUsername()));
+            ResultSet rs = psmt.executeQuery();
+            while (rs.next()) {
+                ratings.add(rs.getInt("Rating"));
             }
-            avgRatings = (double) sum/ratings.size();
+            if (!ratings.isEmpty()) {
+                for (int rating : ratings) {
+                    sum += rating;
+                }
+                avgRatings = (double) sum / ratings.size();
+            }
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
         }
-     }catch (Exception e){
-         System.err.println(e.getClass().getName() + ": " + e.getMessage());
-         System.exit(0);
-     }
-     return avgRatings;
- }
+        return avgRatings;
+    }
 
 }
