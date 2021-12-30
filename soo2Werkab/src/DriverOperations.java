@@ -33,8 +33,10 @@ public class DriverOperations {
 
     public void sendOffer(Driver driver, Ride ride, Double offer) {
         db.makeDriverOffer(driver, offer, ride);
-        logger.log(new Event(EventType.CaptainSetPrice, ride.rideID, Calendar.getInstance()));
+        logger.log(new Event(EventType.CaptainSetPrice, driver.account.getUsername(), String.valueOf(offer), ride.rideID, Calendar.getInstance().getTime()));
     }
+
+
 
     public ArrayList<Ride> listAllRides(Driver driver) {
         ArrayList<Ride> rides = new ArrayList<>();

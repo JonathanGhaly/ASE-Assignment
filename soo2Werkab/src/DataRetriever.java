@@ -198,9 +198,10 @@ public class DataRetriever {
             stmt = c.createStatement();
             String sql = "CREATE TABLE IF NOT EXISTS Logger" +
                     "(EventType CHAR(50) NOT NULL ," +
-                    "RideID INTEGER ," +
-                    "DateTime CHAR(50) , " +
-                    "FOREIGN KEY(RideID) REFERENCES Rides(IDRides) )";
+                    "SourceUser CHAR(50)," +
+                    "Info CHAR(50) ," +
+                    "RideID INT" +
+                    "DateTime CHAR(50) ";
             stmt.executeUpdate(sql);
             stmt.close();
             c.close();
@@ -639,8 +640,10 @@ public class DataRetriever {
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
                 events.add(new Event((EventType) rs.getObject("EventType")
-                        ,rs.getInt("RideID"),
-                        rs.getString("DateTime") ));
+                        ,rs.getString("SourceUser")
+                        ,rs.getString("Info")
+                        ,rs.getInt("RideID")
+                        ,rs.getString("DateTime") ));
             }
             pstmt.close();
             pstmt.close();
@@ -869,13 +872,15 @@ public class DataRetriever {
         }
     }
 
-    public void logEvent(String type, int rideID, String time){
-        String sql = "INSERT INTO Logger (EventType,RideID,DateTime) VAlUES (?,?,?)";
+    public void logEvent(Event event){
+        String sql = "INSERT INTO Logger (EventType,SourceUser,Info,RideID,DateTime) VAlUES (?,?,?)";
         try (Connection conn = this.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)){
-            pstmt.setString(1, type);
-            pstmt.setInt(2, rideID);
-            pstmt.setString(3, time);
+            pstmt.setString(1, event.type);
+            pstmt.setString(2, event.source);
+            pstmt.setString(3, event.info);
+            pstmt.setInt(4, event.rideID);
+            pstmt.setString(5, event.time);
             pstmt.executeUpdate();
             pstmt.close();
         } catch (Exception e) {

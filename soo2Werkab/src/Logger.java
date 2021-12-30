@@ -14,6 +14,6 @@ public class Logger{
     }
 
     void log(Event event){
-        db.logEvent(event.type, event.rideID, event.time);
+        db.logEvent(event);
     }
 }
