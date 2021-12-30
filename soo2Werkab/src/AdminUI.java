@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class AdminUI {
@@ -5,7 +6,7 @@ public class AdminUI {
     Scanner in = new Scanner(System.in);
     String username;
     AdminUI(Admin admin){
-        System.out.println("1- List not verified drivers\n2- Verify Driver\n3- Suspend user\n4- Unsuspend user\n5- logout");
+        System.out.println("1- List not verified drivers\n2- Verify Driver\n3- Suspend user\n4- Unsuspend user\n5- Set discount to area\n6- logout");
         int choice = in.nextInt();
         AdminOperations op = new AdminOperations();
         switch (choice) {
@@ -48,6 +49,24 @@ public class AdminUI {
 
                 break;
             case 5:
+                System.out.println("=======================================");
+                System.out.println("Select an area");
+                ArrayList<Area> areasList = op.listAllAreas(admin);
+                int ind = 0;
+                for (Area area : areasList) {
+                    System.out.println(++ind + " " + area.areaName);
+                }
+                System.out.println(++ind + " -" + "Exit-");
+                int areaChoice = in.nextInt();
+                while(areaChoice < 1 || areaChoice > ind) {
+                    System.out.println("Invalid input, enter your choice again");
+                    areaChoice = in.nextInt();
+                }
+                if (areaChoice != ind) {
+                    op.setDiscountToArea(admin, areasList.get(areaChoice - 1), 10);
+                }
+                break;
+            case 6:
                 System.out.println("=======================================");
                 System.out.println("Logging out");
                 System.out.println("=======================================");

@@ -162,7 +162,8 @@ public class DataRetriever {
             String sql = "CREATE TABLE IF NOT EXISTS Areas " +
                     "(ID INTEGER PRIMARY KEY NOT NULL," +
                     "AreaName CHAR(50) NOT NULL," +
-                    "DISCOUNT INTEGER DEFAULT 0)";
+                    "DISCOUNT INTEGER DEFAULT 0, " +
+                    "UNIQUE(AreaName))";
             stmt.executeUpdate(sql);
             stmt.close();
             c.close();
@@ -1089,4 +1090,34 @@ public class DataRetriever {
         return avgRatings;
     }
 
+    public void setDiscount(Area area, int discount) {
+        try (Connection conn = this.connect()) {
+            String sql = "UPDATE Areas SET DISCOUNT = " + discount + " WHERE ID = " + getAreaId(area);
+            stmt = conn.createStatement();
+            stmt.executeUpdate(sql);
+            stmt.close();
+            c.close();
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        }
+    }
+
+    public ArrayList<Area> getAllAreas() {
+        ArrayList<Area> areasList = new ArrayList<>();
+        int sum = 0;
+        String sql = "SELECT areaName FROM Areas";
+        try (Connection conn = this.connect();
+             PreparedStatement psmt = conn.prepareStatement(sql)
+        ) {
+            ResultSet rs = psmt.executeQuery();
+            while (rs.next()) {
+                areasList.add(new Area(rs.getString("AreaName")));
+            }
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        }
+        return areasList;
+    }
 }

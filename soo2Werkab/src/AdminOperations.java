@@ -22,4 +22,15 @@ public class AdminOperations {
     public void manageUser(User user) {
 
     }
+
+    public void setDiscountToArea(Admin admin, Area area, int discount) {
+        dataRetriever.setDiscount(area, discount);
+    }
+
+    public ArrayList<Area> listAllAreas(Admin admin) {
+        if (admin != null)
+            return dataRetriever.getAllAreas();
+        return null;
+    }
+
 }
