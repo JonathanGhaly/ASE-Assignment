@@ -74,7 +74,9 @@ public class DataRetriever {
             String sql = "CREATE TABLE IF NOT EXISTS Rides " +
                     "(IDRides INTEGER PRIMARY KEY     NOT NULL," +
                     " SourceArea       CHAR(50)    NOT NULL, " +
-                    " DestinationArea  CHAR(50)         NOT NULL, " +
+                    " DestinationArea  CHAR(50)         NOT NULL," +
+                    " PassengersNo INTEGER    NOT NULL ," +
+                    " Alone SMALLINT , " +
                     " RideStatus          TEXT CHECK( RideStatus IN ('Pending','InRide','Completed') )   NOT NULL DEFAULT 'Pending' )";
             stmt.executeUpdate(sql);
             stmt.close();
@@ -742,7 +744,7 @@ public class DataRetriever {
      */
     public ArrayList<Ride> getRidesFromArea(Driver driver) {
         ArrayList<Ride> rides = new ArrayList<>();
-        String sql = "SELECT IDRides,SourceArea,DestinationArea,RideStatus FROM Rides WHERE SourceArea =(" +
+        String sql = "SELECT IDRides,SourceArea,DestinationArea,RideStatus,PassengersNo FROM Rides WHERE SourceArea =(" +
                 "SELECT AreaName FROM Areas WHERE ID = (SELECT AreaID FROM FavoriteArea WHERE DriverID = ?))";
         //FavoriteArea WHERE DriverID = ? AND AreaID = ?
         try (Connection conn = this.connect();
@@ -754,7 +756,7 @@ public class DataRetriever {
             while (rs.next()) {
                 Area Source = new Area(rs.getString("SourceArea"));
                 Area Destination = new Area(rs.getString("DestinationArea"));
-                Ride ride = new Ride(Source, Destination);
+                Ride ride = new Ride(Source, Destination,rs.getInt("PassengersNo"));
                 ride.setRideID(rs.getInt("IDRides"));
                 rides.add(ride);
             }
@@ -793,7 +795,7 @@ public class DataRetriever {
      * @param ride Ride object that hold source and destination
      */
     public void insertRide(Ride ride) {
-        String sql = "INSERT OR IGNORE INTO Rides (IDRides,SourceArea,DestinationArea,RideStatus) Values(?,?,?,?)";
+        String sql = "INSERT OR IGNORE INTO Rides (IDRides,SourceArea,DestinationArea,PassengersNo,Alone,RideStatus) Values(?,?,?,?,?,?)";
         try (Connection conn = this.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             stmt = conn.createStatement();
@@ -803,7 +805,9 @@ public class DataRetriever {
             pstmt.setInt(1, rideID);
             pstmt.setString(2, ride.getSourceArea().toString());
             pstmt.setString(3, ride.getDestinationArea().toString());
-            pstmt.setString(4, ride.getRideStatus());
+            pstmt.setInt(4, ride.getPassengersNo());
+            pstmt.setBoolean(5,ride.getAloneStatus());
+            pstmt.setString(6, ride.getRideStatus());
             pstmt.executeUpdate();
         } catch (Exception e) {
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
@@ -962,7 +966,7 @@ public class DataRetriever {
      * @param rate   Rating of driver from user from 1 -> 5
      */
     public void rateDriver(User user, Driver driver, int rate) {
-        String pstmtSql = "INSERT OR IGNORE INTO Ratings SET UserID, Rating= ?, DriverID = ?;";
+        String pstmtSql = "INSERT OR IGNORE INTO Ratings SET UserID= ? , Rating= ?, DriverID = ?;";
         try (Connection conn = this.connect();
              PreparedStatement psmt = conn.prepareStatement(pstmtSql)
         ) {

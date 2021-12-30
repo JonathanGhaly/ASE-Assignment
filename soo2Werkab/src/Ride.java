@@ -2,6 +2,8 @@ public class Ride extends Publisher {
     private Area sourceArea, destinationArea;
     private String rideStatus;
     int rideID;
+    int passengersNo;
+    boolean aloneStatus;
 
     DataRetriever db = DataRetriever.getInstance();
 
@@ -15,6 +17,15 @@ public class Ride extends Publisher {
         this.sourceArea = sourceArea;
         this.destinationArea = destinationArea;
         this.rideStatus = "Pending";
+        this.passengersNo = 0;
+        aloneStatus = true;
+        //a tiny change
+    }
+    public Ride(Area sourceArea, Area destinationArea,int passengersNo) {
+        this.sourceArea = sourceArea;
+        this.destinationArea = destinationArea;
+        this.rideStatus = "Pending";
+        this.passengersNo = passengersNo;
         //a tiny change
     }
 
@@ -48,15 +59,18 @@ public class Ride extends Publisher {
         return rideID;
     }
 
+    public int getPassengersNo() {
+        return passengersNo;
+    }
+    public boolean getAloneStatus(){
+        return aloneStatus;
+    }
     /**
      * Make ride and add it to the database
      *
-     * @param sourceArea      Area where the ride starts
-     * @param destinationArea Area where the ride will end
+     *
      */
-    void makeRide(Area sourceArea, Area destinationArea) {
-        this.sourceArea = sourceArea;
-        this.destinationArea = destinationArea;
+    void makeRide() { //TODO already has attributes why set again
         this.rideStatus = "Pending";
         db.insertRide(this);
     }

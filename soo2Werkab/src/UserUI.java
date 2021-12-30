@@ -5,6 +5,7 @@ public class UserUI {
     int choice;
     Scanner in = new Scanner(System.in);
     String username,source,dest;
+    int passengersNo;
     UserUI(User user){
         UserOperations userOperations = new UserOperations();
         System.out.println("1- Request ride\n2- Get offers \n3- To Rate driver\n4- Logout");

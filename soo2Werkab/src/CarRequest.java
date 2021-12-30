@@ -7,13 +7,22 @@ public class CarRequest {
     Ride ride;
     User user;
     Area source, destination;
+    boolean aloneStatus;
     public CarRequest(User user, Area source, Area destination) {
         ride = new Ride(source, destination);
-        ride.makeRide(source, destination);
+        ride.makeRide();
         this.client=user;
         isAccepted=false;
         DataRetriever db = DataRetriever.getInstance();
-
+        db.makeCarRequest(this);
+        // source.notify();
+    }
+    public CarRequest(User user, Area source, Area destination,int passengersNo) {
+        ride = new Ride(source, destination,passengersNo);
+        ride.makeRide();
+        this.client=user;
+        isAccepted=false;
+        DataRetriever db = DataRetriever.getInstance();
         db.makeCarRequest(this);
        // source.notify();
     }
