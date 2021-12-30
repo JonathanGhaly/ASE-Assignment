@@ -197,12 +197,12 @@ public class DataRetriever {
             Class.forName("org.sqlite.JDBC");
             c = DriverManager.getConnection("jdbc:sqlite:soo2Werkab.db");
             stmt = c.createStatement();
-            String sql = "CREATE TABLE IF NOT EXISTS Logger" +
+            String sql = "CREATE TABLE IF NOT EXISTS Logger " +
                     "(EventType CHAR(50) NOT NULL ," +
                     "SourceUser CHAR(50)," +
                     "Info CHAR(50) ," +
-                    "RideID INT" +
-                    "DateTime CHAR(50) ";
+                    "RideID INTEGER ," +
+                    "DateTime Timestamp  DEFAULT CURRENT_TIMESTAMP)";
             stmt.executeUpdate(sql);
             stmt.close();
             c.close();

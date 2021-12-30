@@ -50,10 +50,10 @@ public class Main {
                 email = in.nextLine();
                 System.out.println("Please enter the phone number: ");
                 phoneNo = in.next();
-                System.out.println("Please enter Your BirthDate Year/Month/Day: ");
+                System.out.println("Please enter Your BirthDate Day/Month/Year: ");
                 birthDayString = in.next();
                 try {
-                    BirthDay = new SimpleDateFormat("yyyy/MM/dd").parse(birthDayString);
+                    BirthDay = new SimpleDateFormat("dd/MM/YYYY").parse(birthDayString);
 
                 } catch (ParseException e) {
                     e.printStackTrace();
@@ -110,7 +110,7 @@ public class Main {
                             }
                             System.out.println("Enter 0 to refresh list or Enter ride ID to make offer");
                             int driverOffer = in.nextInt();
-                            if (driverOffer > 0) {
+                            if (driverOffer > 0) {  //TODO Refactor  Known Bug didnt refresh correctly
                                 for (Ride ride : driverOperations.listAllRides(driver)) {
                                     if (ride.getRideID() == driverOffer) {
                                         System.out.println("Please enter the price");
@@ -121,7 +121,7 @@ public class Main {
                                     }
                                 }
                             }
-                            System.out.println("Enter 0 to refresh list or -1 to exit");
+                            System.out.println("Enter 0 to refresh list or -1 to exit"); //TODO ADD REFRESH
                             choice = in.nextInt();
 
                         }
