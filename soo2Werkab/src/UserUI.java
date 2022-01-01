@@ -19,7 +19,13 @@ public class UserUI {
                 dest = in.next();
                 Area src = new Area(source);
                 Area destination = new Area(dest);
-                userOperations.requestRide(user,src,destination);
+                System.out.println("Would you like to be alone on this ride?");
+                //TODO add alone
+
+                System.out.println("Please enter the number of passengers");
+                passengersNo = in.nextInt();
+                //TODO add alone status/choose carpool or not
+                userOperations.requestRide(user,src,destination,passengersNo,true);
                 System.out.println("=======================================");
 
                 System.out.println("1- Get available offers");

@@ -18,14 +18,25 @@ public class Ride extends Publisher {
         this.destinationArea = destinationArea;
         this.rideStatus = "Pending";
         this.passengersNo = 0;
-        aloneStatus = true;
+//        aloneStatus = true;
         //a tiny change
     }
-    public Ride(Area sourceArea, Area destinationArea,int passengersNo) {
+
+    public Ride(Area sourceArea, Area destinationArea, int passengersNo) {
         this.sourceArea = sourceArea;
         this.destinationArea = destinationArea;
         this.rideStatus = "Pending";
         this.passengersNo = passengersNo;
+
+        //a tiny change
+    }
+
+    public Ride(Area sourceArea, Area destinationArea, int passengersNo, String rideStatus, boolean aloneStatus) {
+        this.sourceArea = sourceArea;
+        this.destinationArea = destinationArea;
+        this.rideStatus = rideStatus;
+        this.passengersNo = passengersNo;
+        this.aloneStatus = aloneStatus;
         //a tiny change
     }
 
@@ -62,13 +73,13 @@ public class Ride extends Publisher {
     public int getPassengersNo() {
         return passengersNo;
     }
-    public boolean getAloneStatus(){
+
+    public boolean getAloneStatus() {
         return aloneStatus;
     }
+
     /**
      * Make ride and add it to the database
-     *
-     *
      */
     void makeRide() { //TODO already has attributes why set again
         this.rideStatus = "Pending";

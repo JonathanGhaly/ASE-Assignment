@@ -223,13 +223,21 @@ public class DataRetriever {
                     "(RequestID INTEGER PRIMARY KEY NOT NULL ," +
                     "DriverID INTEGER ," +
                     "CustomerID INTEGER ," +
-                    "RideID INTEGER ," +
+                    "CustomerID2 INTEGER  DEFAULT  -1," +
+                    "CustomerID3 INTEGER DEFAULT -1," +
+                    "CustomerID4 INTEGER  DEFAULT -1," +
+                    "RideID INTEGER UNIQUE ," +
                     "driverOffer DOUBLE NULL," +
                     "isAccepted SMALLINT NULL ," +
-                    "createTime DEFAULT CURRENT_TIMESTAMP ," +
+                    "createTime DEFAULT CURRENT_TIMESTAMP," +
+                    "Alone SMALLINT ," +
                     "FOREIGN KEY(DriverID)  REFERENCES DriverAccount(DriverID)," +
                     "FOREIGN KEY(CustomerID) REFERENCES UserAccounts(AccountID)," +
-                    "FOREIGN KEY(RideID) REFERENCES Rides(IDRides))";
+                    "FOREIGN KEY(RideID) REFERENCES Rides(IDRides)," +
+                    "FOREIGN KEY(CustomerID2) REFERENCES UserAccounts(AccountID)," +
+                    "FOREIGN KEY(CustomerID3) REFERENCES UserAccounts(AccountID)," +
+                    "FOREIGN KEY(CustomerID4) REFERENCES UserAccounts(AccountID))";
+
             stmt.executeUpdate(sql);
             stmt.close();
             c.close();
@@ -770,6 +778,34 @@ public class DataRetriever {
         return rides;
     }
 
+
+     public ArrayList<Ride> getCarpoolRides(Area source, Area destination){
+        ArrayList<Ride> ret = new ArrayList<>();
+        String sql = "SELECT * From Rides WHERE Alone = 0 AND PassengersNo < 4" +
+                " AND RideStatus= 'Pending' AND SourceArea = ? AND DestinationArea = ?";
+         try (Connection conn = this.connect();
+              PreparedStatement pstmt = conn.prepareStatement(sql)
+         ) {
+             pstmt.setString(1,source.areaName);
+             pstmt.setString(2, destination.areaName);
+             ResultSet rs = pstmt.executeQuery();
+             while (rs.next()){
+                 Area src = new Area(rs.getString("SourceArea"));
+                 Area dest = new Area(rs.getString("DestinationArea"));
+                 Ride ride = new Ride(src,dest,rs.getInt("PassengersNo"));
+                 ret.add(ride);
+             }
+         } catch (Exception e) {
+             System.err.println(e.getClass().getName() + ": " + e.getMessage());
+             System.exit(0);
+         }
+        return ret;
+     }
+
+     public void addCustomertoRide(User user,int rideID){
+
+     }
+
     /**
      * Add area if not found in the Areas table
      *
@@ -815,6 +851,7 @@ public class DataRetriever {
         }
 
     }
+
 
     /**
      * Assign to driver favorite area and it doesn't allow duplicates
@@ -901,7 +938,7 @@ public class DataRetriever {
      * @param carRequest
      */
     public void makeCarRequest(CarRequest carRequest) {
-        String sql = "INSERT OR IGNORE INTO Requests (DriverID,CustomerID,RideID,driverOffer,isAccepted) VALUES (?,?,?,?,?)";
+        String sql = "INSERT OR IGNORE INTO Requests (DriverID,CustomerID,RideID,driverOffer,isAccepted,Alone) VALUES (?,?,?,?,?,?)";
         try (Connection conn = this.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             stmt = conn.createStatement();
@@ -916,6 +953,7 @@ public class DataRetriever {
             pstmt.setInt(3, carRequest.ride.getRideID());
             pstmt.setDouble(4, 0);
             pstmt.setInt(5, 0);
+            pstmt.setBoolean(6,carRequest.aloneStatus);
             pstmt.executeUpdate();
             pstmt.close();
             stmt.close();
@@ -1125,3 +1163,4 @@ public class DataRetriever {
         return areasList;
     }
 }
+

@@ -7,25 +7,37 @@ public class CarRequest {
     Ride ride;
     User user;
     Area source, destination;
-    boolean aloneStatus;
+    boolean aloneStatus,carpool;
+
     public CarRequest(User user, Area source, Area destination) {
         ride = new Ride(source, destination);
         ride.makeRide();
         this.client=user;
         isAccepted=false;
+        aloneStatus = true;
         DataRetriever db = DataRetriever.getInstance();
-        db.makeCarRequest(this);
+        //db.makeCarRequest(this);
         // source.notify();
     }
-    public CarRequest(User user, Area source, Area destination,int passengersNo) {
+    public CarRequest(User user, Area source, Area destination,int passengersNo) { //use this
         ride = new Ride(source, destination,passengersNo);
         ride.makeRide();
         this.client=user;
         isAccepted=false;
+        aloneStatus = true;
         DataRetriever db = DataRetriever.getInstance();
         db.makeCarRequest(this);
        // source.notify();
     }
+//    public CarRequest(User user,Area source,Area destination,boolean carpool){
+//        this.client= user;
+//        isAccepted = false;
+//        aloneStatus = false;
+//        DataRetriever db = DataRetriever.getInstance(); //TODO continue
+//
+//    }
+
+
     void setDriver(Driver driver){
         this.driver = driver;
         updateRequest();
