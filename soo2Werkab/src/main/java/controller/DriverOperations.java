@@ -11,11 +11,11 @@ public class DriverOperations {
     DataRetriever db = DataRetriever.getInstance();
     Logger logger = Logger.getInstance();
 
-    ArrayList<Integer> showRating(Driver driver) {
+    public ArrayList<Integer> showRating(Driver driver) {
         return db.getRating(db.getID(driver.account.getUsername()));
     }
 
-    void notifyOfRequest(Driver driver, CarRequest request) {
+    public void notifyOfRequest(Driver driver, CarRequest request) {
         System.out.println("DO you want to accept the ride with : ");
         System.out.println(request.toString());
         sc = new Scanner(System.in);
@@ -23,7 +23,7 @@ public class DriverOperations {
         request.responce(choice);
     }
 
-    void addFavouriteArea(Driver driver, Area area) {
+    public void addFavouriteArea(Driver driver, Area area) {
         db.insertDriverFavoriteArea(driver, area);
     }
 
@@ -53,7 +53,7 @@ public class DriverOperations {
         db.endRide(driver);
     }
 
-    public void arrivedToUserLocation(Driver driver){
+    public void arrivedToUserLocation(Driver driver) {
         db.logArrival(driver.account.getUsername());
     }
 

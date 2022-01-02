@@ -629,7 +629,7 @@ public class DataRetriever {
      * @param driverID ID of the driver to get his rating
      * @return rating (double)
      */
-    ArrayList<Integer> getRating(int driverID) {
+    public ArrayList<Integer> getRating(int driverID) {
         String sql = "select Rating from Ratings where DriverID = ?;";
         ArrayList<Integer> rate = new ArrayList<>();
         try (Connection conn = this.connect();
@@ -684,7 +684,7 @@ public class DataRetriever {
         try (Connection conn = this.connect()) {
             stmt = conn.createStatement();
             String sql = "SELECT DriverID,DriverName,Rating,Price,RideID FROM Offers " +
-                    "Where RideID = (SELECT RideID FROM Requests WHERE CustomerID = " + this.getID(user.account.getUsername()) + ");";
+                    "Where RideID = (SELECT RideID FROM Requests WHERE CustomerID = " + this.getID(user.getAccount().getUsername()) + ");";
             ResultSet rs = stmt.executeQuery(sql);
             while (rs.next()) {
                 Offer offer = new Offer(rs.getDouble("Price"), getDriver(rs.getString("DriverName")), rs.getInt("RideID"));
@@ -757,7 +757,7 @@ public class DataRetriever {
      * @param driver controller.Driver object who want to list all rides from his favorite area
      * @return ArrayList of Rides
      */
-    public ArrayList<Ride> getRidesFromArea(Driver driver) {
+    public ArrayList<Ride> getRidesFromArea(controller.Driver driver) {
         ArrayList<Ride> rides = new ArrayList<>();
         String sql = "SELECT IDRides,SourceArea,DestinationArea,RideStatus,PassengersNo FROM Rides WHERE SourceArea =(" +
                 "SELECT AreaName FROM Areas WHERE ID = (SELECT AreaID FROM FavoriteArea WHERE DriverID = ?))";
@@ -765,7 +765,7 @@ public class DataRetriever {
         try (Connection conn = this.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)
         ) {
-            pstmt.setInt(1, getID(driver.account.getUsername()));
+            pstmt.setInt(1, getID(driver.getAccount().getUsername()));
             ResultSet rs = pstmt.executeQuery();
 
             while (rs.next()) {
@@ -958,15 +958,15 @@ public class DataRetriever {
         }
     }
 
-    public void logEvent(Event event) {
+    public void logEvent(controller.Event event) {
         String sql = "INSERT INTO Logger (EventType,SourceUser,Info,RideID,DateTime) VAlUES (?,?,?,?,?)";
         try (Connection conn = this.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, event.type);
-            pstmt.setString(2, event.source);
-            pstmt.setString(3, event.info);
-            pstmt.setInt(4, event.rideID);
-            pstmt.setString(5, event.time);
+            pstmt.setString(1, event.getType());
+            pstmt.setString(2, event.getSource());
+            pstmt.setString(3, event.getInfo());
+            pstmt.setInt(4, event.getRideID());
+            pstmt.setString(5, event.getTime());
             pstmt.executeUpdate();
             pstmt.close();
         } catch (Exception e) {
@@ -997,7 +997,7 @@ public class DataRetriever {
             pstmt.setInt(3, carRequest.getRide().getRideID());
             pstmt.setDouble(4, 0);
             pstmt.setInt(5, 0);
-            pstmt.setBoolean(6, carRequest.aloneStatus);
+            pstmt.setBoolean(6, carRequest.getAloneStatus());
             pstmt.executeUpdate();
             pstmt.close();
             stmt.close();
@@ -1016,7 +1016,7 @@ public class DataRetriever {
      * @param ride      ride to make offer for
      */
     //TODO Check its functionality
-    public void makeDriverOffer(Driver carDriver, Double offer, Ride ride) {
+    public void makeDriverOffer(controller.Driver carDriver, Double offer, Ride ride) {
         String sql1 = "INSERT INTO Offers (DriverID,DriverName,RideID,Rating,Price) VALUES (?,?,?,?,?)";
         String sql2 = "SELECT RideID,CustomerID FROM Requests WHERE " +
                 "RideID = ?;";
@@ -1027,8 +1027,8 @@ public class DataRetriever {
         ) {
             pstmt2.setInt(1, ride.getRideID());
             ResultSet rs2 = pstmt2.executeQuery();
-            pstmt.setInt(1, this.getID(carDriver.account.getUsername()));
-            pstmt.setString(2, carDriver.account.getUsername());
+            pstmt.setInt(1, this.getID(carDriver.getAccount().getUsername()));
+            pstmt.setString(2, carDriver.getAccount().getUsername());
             pstmt.setInt(3, rs2.getInt("RideID"));
             pstmt.setDouble(4, calAvgRating(carDriver));
             pstmt.setDouble(5, offer);
@@ -1047,15 +1047,15 @@ public class DataRetriever {
      * @param driver to be rated
      * @param rate   Rating of driver from user from 1 -> 5
      */
-    public void rateDriver(User user, Driver driver, int rate) {
+    public void rateDriver(controller.User user, controller.Driver driver, int rate) {
         String pstmtSql = "INSERT OR IGNORE INTO Ratings (UserID   , Rating, DriverID ) VALUES (?,?,?)";
         try (Connection conn = this.connect();
              PreparedStatement psmt = conn.prepareStatement(pstmtSql)
         ) {
             stmt = conn.createStatement();
-            psmt.setInt(1, getID(user.account.getUsername()));
+            psmt.setInt(1, getID(user.getAccount().getUsername()));
             psmt.setInt(2, rate);
-            psmt.setInt(3, getID(driver.account.getUsername()));
+            psmt.setInt(3, getID(driver.getAccount().getUsername()));
             String sql = "UPDATE DriverAccount SET AvgRating = " + this.calAvgRating(driver);
             stmt.executeUpdate(sql);
             psmt.executeUpdate();
@@ -1073,9 +1073,9 @@ public class DataRetriever {
      * @param carDriver controller.Driver who want to delete his area
      * @param area      controller.Area to be deleted
      */
-    public void removeCarDriverFavouriteArea(Driver carDriver, Area area) {
+    public void removeCarDriverFavouriteArea(controller.Driver carDriver, Area area) {
         try (Connection conn = this.connect()) {
-            String sql = "DELETE FROM FavoriteArea WHERE DriverID = " + this.getID(carDriver.account.getUsername()) + " AND AreaID = " + getAreaId(area) + ";";
+            String sql = "DELETE FROM FavoriteArea WHERE DriverID = " + this.getID(carDriver.getAccount().getUsername()) + " AND AreaID = " + getAreaId(area) + ";";
             stmt = conn.createStatement();
             stmt.executeUpdate(sql);
             stmt.close();
@@ -1150,7 +1150,7 @@ public class DataRetriever {
         this.LoggerDB();
     }
 
-    public double calAvgRating(Driver driver) {
+    public double calAvgRating(controller.Driver driver) {
         double avgRatings = 0.0;
         int sum = 0;
         String sql = "SELECT Rating FROM Ratings WHERE DriverID = ?";
@@ -1158,7 +1158,7 @@ public class DataRetriever {
              PreparedStatement psmt = conn.prepareStatement(sql)
         ) {
             ArrayList<Integer> ratings = new ArrayList<>();
-            psmt.setInt(1, getID(driver.account.getUsername()));
+            psmt.setInt(1, getID(driver.getAccount().getUsername()));
             ResultSet rs = psmt.executeQuery();
             while (rs.next()) {
                 ratings.add(rs.getInt("Rating"));
@@ -1298,7 +1298,7 @@ public class DataRetriever {
         try (Connection conn = this.connect();
              PreparedStatement psmt = conn.prepareStatement(sql)
         ) {
-            psmt.setInt(1, getID(user.account.getUsername()));
+            psmt.setInt(1, getID(user.getAccount().getUsername()));
             ResultSet rs = psmt.executeQuery();
             ret = rs.getString("UserStatus");
             psmt.close();
@@ -1342,7 +1342,7 @@ public class DataRetriever {
         try (Connection conn = this.connect();
              PreparedStatement psmt = conn.prepareStatement(sql)
         ) {
-            psmt.setInt(1, getID(user.account.getUsername()));
+            psmt.setInt(1, getID(user.getAccount().getUsername()));
             ResultSet rs = psmt.executeQuery();
             int c = 0;
             while (rs.next()) {
@@ -1384,7 +1384,7 @@ public class DataRetriever {
         try (Connection conn = this.connect();
              PreparedStatement psmt = conn.prepareStatement(sql)
         ) {
-            psmt.setInt(1, getID(user.account.getUsername()));
+            psmt.setInt(1, getID(user.getAccount().getUsername()));
             ResultSet rs = psmt.executeQuery();
             ret = rs.getString("BirthDate");
             psmt.close();
@@ -1395,7 +1395,7 @@ public class DataRetriever {
         return ret;
     }
 
-    public void endRide(Driver driver) {
+    public void endRide(controller.Driver driver) {
         String sql = "SELECT * FROM Requests WHERE DriverID = ?";
         String sql2 = "SELECT UserName FROM Accounts WHERE IDAccount = ?";
         try (Connection conn = this.connect();
@@ -1403,7 +1403,7 @@ public class DataRetriever {
              PreparedStatement psmt2 = conn.prepareStatement(sql2)
 
         ) {
-            psmt.setInt(1, getID(driver.account.getUsername()));
+            psmt.setInt(1, getID(driver.getAccount().getUsername()));
             ResultSet rs = psmt.executeQuery();
             psmt2.setInt(1, rs.getInt("CustomerID"));
             ResultSet rs2 = psmt2.executeQuery();
@@ -1417,7 +1417,7 @@ public class DataRetriever {
             changeDriverStatus(driver, "idle");
             changeUserStatus(getUser(username), "complete");
             updateRideStatus(rideID, "Completed");
-            logEvent(new Event(EventType.ArrivedToDest, driver.account.getUsername(), username, rideID, Calendar.getInstance().getTime()));
+            logEvent(new controller.Event(EventType.ArrivedToDest, driver.getAccount().getUsername(), username, rideID, Calendar.getInstance().getTime()));
             psmt.close();
         } catch (Exception e) {
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
@@ -1433,7 +1433,7 @@ public class DataRetriever {
         ){
             psmt.setString(1, driverUsername);
             ResultSet rs = psmt.executeQuery();
-            logEvent(new Event(EventType.ArrivedToUserLoc, driverUsername, rs.getString("CustomerID"),
+            logEvent(new controller.Event(EventType.ArrivedToUserLoc, driverUsername, rs.getString("CustomerID"),
                     rs.getInt("RideID"),Calendar.getInstance().getTime() ));
         }
         catch (Exception e) {
@@ -1442,7 +1442,7 @@ public class DataRetriever {
         }
     }
 
-    public String getDriverName(User user) {
+    public String getDriverName(controller.User user) {
         String ret = "";
         String sql = "SELECT DriverID FROM Requests WHERE CustomerID = ?";
         String sql2 = "SELECT UserName FROM Accounts WHERE IDAccount = ?";
@@ -1451,7 +1451,7 @@ public class DataRetriever {
              PreparedStatement psmt2 = conn.prepareStatement(sql2)
 
         ) {
-            psmt.setInt(1, getID(user.account.getUsername()));
+            psmt.setInt(1, getID(user.getAccount().getUsername()));
             ResultSet rs = psmt.executeQuery();
             ArrayList<Integer> id = new ArrayList<>();
             while (rs.next()) {

@@ -23,5 +23,9 @@ public class Event {
         this.rideID = rideID;
         this.time = time;
     }
-
+    public String getType(){return type;}
+    public String getSource(){return source;}
+    public String getInfo(){return info;}
+    public String getTime(){return time;}
+    public int getRideID(){return rideID;}
 }
