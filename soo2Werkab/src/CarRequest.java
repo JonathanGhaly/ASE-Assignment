@@ -54,6 +54,10 @@ public class CarRequest {
         db.updateCarRequest(this);
     }
 
+    int getRideID(){
+        return ride.getRideID();
+    }
+
 
     public void notifyUser() { //TODO queryDB to notify User for change
         //TODO show driverOffer,Driver

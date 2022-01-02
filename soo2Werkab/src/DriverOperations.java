@@ -48,6 +48,11 @@ public class DriverOperations {
     public void endRide(Driver driver) {
         db.endRide(driver);
     }
+
+    public void arrivedToUserLocation(Driver driver){
+        db.logArrival(driver.account.getUsername());
+    }
+
 //    int rate(Driver driver) {
 //        return db.getRating(db.getID(driver.account.getUsername()));
 //    }

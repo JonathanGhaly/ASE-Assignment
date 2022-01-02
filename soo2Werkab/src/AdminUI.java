@@ -7,7 +7,7 @@ public class AdminUI implements UI {
     String username;
 
     AdminUI(Admin admin) {
-        System.out.println("1- List not verified drivers\n2- Verify Driver\n3- Suspend user\n4- Unsuspend user\n5- Set discount to area\n6- logout");
+        System.out.println("1- List not verified drivers\n2- Verify Driver\n3- Suspend user\n4- Unsuspend user\n5- Set discount to area\n6- View events in ride\n7-Logout");
         int choice = in.nextInt();
         AdminOperations op = new AdminOperations();
         switch (choice) {
@@ -68,6 +68,13 @@ public class AdminUI implements UI {
                 }
                 break;
             case 6:
+                System.out.println("=======================================");
+                System.out.println("Enter the ride ID");
+                int rideID = in .nextInt();
+                String eventString = op.getEventsOfRide(rideID);
+                System.out.println(eventString);
+                System.out.println("=======================================");
+            case 7:
                 System.out.println("=======================================");
                 System.out.println("Logging out");
                 System.out.println("=======================================");

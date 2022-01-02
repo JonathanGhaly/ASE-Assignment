@@ -36,4 +36,14 @@ public class AdminOperations {
         return null;
     }
 
+    public String getEventsOfRide(int rideID) {
+        ArrayList<Event> events = dataRetriever.getEventsOfRide(rideID);
+
+        StringBuilder result = new StringBuilder();
+        for (Event event : events) {
+            result.append(event.type).append(" ").append(event.source).append(" ").append(event.info).append(" ").append(event.time);
+            result.append("\n");
+        }
+        return result.toString();
+    }
 }

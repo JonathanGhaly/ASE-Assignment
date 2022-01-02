@@ -13,6 +13,10 @@ public class Offer {
         this.rideID = rideID;
     }
 
+    public int getRideID(){
+        return rideID;
+    }
+
     @Override
     public String toString() {
         return this.driver.account.getUsername();

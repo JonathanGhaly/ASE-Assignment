@@ -10,7 +10,7 @@ public class UserUI implements UI {
 
     UserUI(User user) {
         UserOperations userOperations = new UserOperations();
-        if (user.getUserStatus().equals("idle")) {
+        if (user != null && user.getUserStatus().equals("idle")) {
             System.out.println("1- Request alone ride \n2- Request share ride\n3- Get offers\n4- Join shared ride \n5- To Rate driver\n6- Logout");
             choice = in.nextInt();
             switch (choice) {

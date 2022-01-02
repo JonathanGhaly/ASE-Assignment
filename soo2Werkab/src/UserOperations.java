@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Calendar;
 
 public class UserOperations {
     DataRetriever db = DataRetriever.getInstance();
@@ -43,6 +44,7 @@ public class UserOperations {
 
     public void acceptRide(User user, Offer offer) {
         db.acceptRide(user, offer);
+        db.logEvent(new Event(EventType.UserAcceptPrice, user.account.getUsername(), "", offer.getRideID(), Calendar.getInstance().getTime()));
     }
 
     public String getDriverName(User user) {

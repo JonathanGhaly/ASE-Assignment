@@ -1,5 +1,6 @@
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Calendar;
 
 public class DataRetriever {
     Connection c = null;
@@ -643,13 +644,13 @@ public class DataRetriever {
 
     ArrayList<Event> getEventsOfRide(int rideID) {
         ArrayList<Event> events = new ArrayList<>();
-        String sql = "Select EventType,RideID,DateTime FROM Logger" +
-                "Where RideID = " + rideID;
+        String sql = "Select EventType,SourceUser,Info,RideID,DateTime FROM Logger " +
+                "Where RideID = " + rideID + ";";
         try (Connection conn = this.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
-                events.add(new Event((EventType) rs.getObject("EventType")
+                events.add(new Event(rs.getString("EventType")
                         , rs.getString("SourceUser")
                         , rs.getString("Info")
                         , rs.getInt("RideID")
@@ -951,7 +952,7 @@ public class DataRetriever {
     }
 
     public void logEvent(Event event) {
-        String sql = "INSERT INTO Logger (EventType,SourceUser,Info,RideID,DateTime) VAlUES (?,?,?)";
+        String sql = "INSERT INTO Logger (EventType,SourceUser,Info,RideID,DateTime) VAlUES (?,?,?,?,?)";
         try (Connection conn = this.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, event.type);
@@ -1409,8 +1410,26 @@ public class DataRetriever {
             changeDriverStatus(driver, "idle");
             changeUserStatus(getUser(username), "complete");
             updateRideStatus(rideID, "Completed");
+            logEvent(new Event(EventType.ArrivedToDest, driver.account.getUsername(), username, rideID, Calendar.getInstance().getTime()));
             psmt.close();
         } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        }
+    }
+
+    public void logArrival(String driverUsername){
+        String sql = "SELECT * FROM Requests WHERE DriverID = ?";
+        try(Connection conn  = this.connect();
+            PreparedStatement psmt = conn.prepareStatement(sql);
+
+        ){
+            psmt.setString(1, driverUsername);
+            ResultSet rs = psmt.executeQuery();
+            logEvent(new Event(EventType.ArrivedToUserLoc, driverUsername, rs.getString("CustomerID"),
+                    rs.getInt("RideID"),Calendar.getInstance().getTime() ));
+        }
+        catch (Exception e) {
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
             System.exit(0);
         }

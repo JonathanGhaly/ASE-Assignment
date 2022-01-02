@@ -16,8 +16,8 @@ public class Event {
         this.time = time.toString();
     }
 
-    Event(EventType eventType, String source, String info, int rideID, String time) {
-        this.type = eventType.toString();
+    Event(String eventType, String source, String info, int rideID, String time) {
+        this.type = eventType;
         this.source = source;
         this.info = info;
         this.rideID = rideID;
