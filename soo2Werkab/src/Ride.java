@@ -47,7 +47,7 @@ public class Ride extends Publisher {
      */
     public void setRideStatus(String status) {
         this.rideStatus = status;
-        db.updateRideStatus(this, status);
+        db.updateRideStatus(this.rideID, status);
     }
 
     public void setRideID(int rideID) {

@@ -26,8 +26,8 @@ public class Area extends Publisher {
 //            drivers[i].notifyOfRequest(request);
 //    }
 
-    void notifyDrivers(CarRequest request){
-        events.notify("New Ride",request);
+    void notifyDrivers(CarRequest request) {
+        events.notify("New Ride", request);
     }
 
     @Override

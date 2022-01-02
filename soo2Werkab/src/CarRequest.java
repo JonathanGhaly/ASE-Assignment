@@ -7,27 +7,28 @@ public class CarRequest {
     Ride ride;
     User user;
     Area source, destination;
-    boolean aloneStatus,carpool;
+    boolean aloneStatus, carpool;
+    DataRetriever db = DataRetriever.getInstance();
+
 
     public CarRequest(User user, Area source, Area destination) {
         ride = new Ride(source, destination);
         ride.makeRide();
-        this.client=user;
-        isAccepted=false;
+        this.client = user;
+        isAccepted = false;
         aloneStatus = true;
-        DataRetriever db = DataRetriever.getInstance();
-        //db.makeCarRequest(this);
+        db.makeCarRequest(this);
         // source.notify();
     }
-    public CarRequest(User user, Area source, Area destination,int passengersNo) { //use this
-        ride = new Ride(source, destination,passengersNo);
+
+    public CarRequest(User user, Area source, Area destination, int passengersNo) { //use this
+        ride = new Ride(source, destination, passengersNo);
         ride.makeRide();
-        this.client=user;
-        isAccepted=false;
-        aloneStatus = true;
-        DataRetriever db = DataRetriever.getInstance();
+        this.client = user;
+        isAccepted = false;
+        aloneStatus = false;
         db.makeCarRequest(this);
-       // source.notify();
+        // source.notify();
     }
 //    public CarRequest(User user,Area source,Area destination,boolean carpool){
 //        this.client= user;
@@ -38,21 +39,23 @@ public class CarRequest {
 //    }
 
 
-    void setDriver(Driver driver){
+    void setDriver(Driver driver) {
         this.driver = driver;
         updateRequest();
     }
-    void setDriverOffer(Double offer){
-        this.driverOffer=offer;
+
+    void setDriverOffer(Double offer) {
+        this.driverOffer = offer;
         updateRequest();
     }
-    void updateRequest(){
+
+    void updateRequest() {
         DataRetriever db = DataRetriever.getInstance();
         db.updateCarRequest(this);
     }
 
 
-    public void notifyUser(){ //TODO queryDB to notify User for change
+    public void notifyUser() { //TODO queryDB to notify User for change
         //TODO show driverOffer,Driver
 
     }
@@ -65,7 +68,7 @@ public class CarRequest {
 //
 //    }
 
-    void responce( Boolean response){
+    void responce(Boolean response) {
 
     }
 

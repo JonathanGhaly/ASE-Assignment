@@ -1,4 +1,3 @@
-import java.awt.image.AreaAveragingScaleFilter;
 import java.sql.*;
 import java.util.ArrayList;
 
@@ -54,7 +53,7 @@ public class DataRetriever {
                     " Email          CHAR(50)  NULL , " +
                     " mobileNo         CHAR(11) NOT NULL ," +
                     "isSuspended SMALLINT ," +
-                    "BirthDate TIMESTAMP DEFAULT NULL ," +
+                    "BirthDate CHAR(10) DEFAULT NULL ," +
                     "createTime DEFAULT CURRENT_TIMESTAMP ," +
                     "UNIQUE(UserName))";
             stmt.executeUpdate(sql);
@@ -94,7 +93,7 @@ public class DataRetriever {
             stmt = c.createStatement();
             String sql = "CREATE TABLE IF NOT EXISTS UserAccounts " +
                     "(AccountID INTEGER ," +
-                    " UserStatus   TEXT CHECK( UserStatus IN ('Offline','InRide','Pending','idle') )   NOT NULL DEFAULT 'idle'," +
+                    " UserStatus   TEXT  NOT NULL DEFAULT 'idle'," +
                     "FOREIGN KEY(AccountID)  REFERENCES Accounts(IDAccount))";
             stmt.executeUpdate(sql);
             stmt.close();
@@ -305,7 +304,7 @@ public class DataRetriever {
             pstmt.setString(4, a.getEmail());
             pstmt.setString(5, a.getMobileNumber());
             pstmt.setInt(6, 0);
-            pstmt.setTimestamp(7, new Timestamp(a.getBirthDate().getTime()));
+            pstmt.setString(7, a.getBirthDate());
             pstmt.executeUpdate();
         } catch (Exception e) {
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
@@ -573,7 +572,7 @@ public class DataRetriever {
      * @return Account ID
      */
     public int getID(String username) {
-        int id = -1;
+        int id = - 1;
         String sql = "SELECT IDAccount FROM Accounts Where UserName = ?";
         try (Connection conn = this.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -600,7 +599,7 @@ public class DataRetriever {
     public int getAreaId(Area area) {
         this.addArea(area);
         String sql = "SELECT ID FROM Areas where AreaName = ?" + ";";
-        int id = -1;
+        int id = - 1;
         try (Connection conn = this.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)
         ) {
@@ -651,10 +650,10 @@ public class DataRetriever {
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
                 events.add(new Event((EventType) rs.getObject("EventType")
-                        ,rs.getString("SourceUser")
-                        ,rs.getString("Info")
-                        ,rs.getInt("RideID")
-                        ,rs.getString("DateTime") ));
+                        , rs.getString("SourceUser")
+                        , rs.getString("Info")
+                        , rs.getInt("RideID")
+                        , rs.getString("DateTime")));
             }
             pstmt.close();
             pstmt.close();
@@ -676,11 +675,11 @@ public class DataRetriever {
         ArrayList<Offer> offers = new ArrayList<>();
         try (Connection conn = this.connect()) {
             stmt = conn.createStatement();
-            String sql = "SELECT DriverID,DriverName,Rating,Price FROM Offers " +
+            String sql = "SELECT DriverID,DriverName,Rating,Price,RideID FROM Offers " +
                     "Where RideID = (SELECT RideID FROM Requests WHERE CustomerID = " + this.getID(user.account.getUsername()) + ");";
             ResultSet rs = stmt.executeQuery(sql);
             while (rs.next()) {
-                Offer offer = new Offer(rs.getDouble("Price"), getDriver(rs.getString("DriverName")));
+                Offer offer = new Offer(rs.getDouble("Price"), getDriver(rs.getString("DriverName")), rs.getInt("RideID"));
                 offers.add(offer);
             }
             stmt.close();
@@ -764,7 +763,7 @@ public class DataRetriever {
             while (rs.next()) {
                 Area Source = new Area(rs.getString("SourceArea"));
                 Area Destination = new Area(rs.getString("DestinationArea"));
-                Ride ride = new Ride(Source, Destination,rs.getInt("PassengersNo"));
+                Ride ride = new Ride(Source, Destination, rs.getInt("PassengersNo"));
                 ride.setRideID(rs.getInt("IDRides"));
                 rides.add(ride);
             }
@@ -779,32 +778,63 @@ public class DataRetriever {
     }
 
 
-     public ArrayList<Ride> getCarpoolRides(Area source, Area destination){
+    public ArrayList<Ride> getCarpoolRides(Area source, Area destination) {
         ArrayList<Ride> ret = new ArrayList<>();
-        String sql = "SELECT * From Rides WHERE Alone = 0 AND PassengersNo < 4" +
+        String sql = "SELECT * From Rides WHERE Alone = 0 AND PassengersNo < 3 AND PassengersNo > 0" +
                 " AND RideStatus= 'Pending' AND SourceArea = ? AND DestinationArea = ?";
-         try (Connection conn = this.connect();
-              PreparedStatement pstmt = conn.prepareStatement(sql)
-         ) {
-             pstmt.setString(1,source.areaName);
-             pstmt.setString(2, destination.areaName);
-             ResultSet rs = pstmt.executeQuery();
-             while (rs.next()){
-                 Area src = new Area(rs.getString("SourceArea"));
-                 Area dest = new Area(rs.getString("DestinationArea"));
-                 Ride ride = new Ride(src,dest,rs.getInt("PassengersNo"));
-                 ret.add(ride);
-             }
-         } catch (Exception e) {
-             System.err.println(e.getClass().getName() + ": " + e.getMessage());
-             System.exit(0);
-         }
+        try (Connection conn = this.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)
+        ) {
+            pstmt.setString(1, source.areaName);
+            pstmt.setString(2, destination.areaName);
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                Area src = new Area(rs.getString("SourceArea"));
+                Area dest = new Area(rs.getString("DestinationArea"));
+                Ride ride = new Ride(src, dest, rs.getInt("PassengersNo"));
+                ret.add(ride);
+            }
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        }
         return ret;
-     }
+    }
 
-     public void addCustomertoRide(User user,int rideID){
+    public int getAvaliblePlace(int rideID) {
+        String sql = "SELECT CustomerID2,CustomerID3,CustomerID4 From Requests WHERE RideID =" + rideID;
+        int ind = - 1;
+        try (Connection conn = this.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)
+        ) {
+            ResultSet rs = pstmt.executeQuery();
+            int[] id = {rs.getInt("CustomerID2"), rs.getInt("CustomerID3"), rs.getInt("CustomerID4")};
+            for (int i = 0; i < 3; i++) {
+                if (id[i] == - 1) {
+                    ind = id[i];
+                    break;
+                }
+            }
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        }
+        return ind;
+    }
 
-     }
+    public void joinCarRequest(User user, int rideID) {
+        int id = getAvaliblePlace(rideID) + 1;
+        String sql = "INSERT INTO Requests VALUES CustomerID2 = ?,CustomerID3 = ?,CustomerID4 = ?";
+        try (Connection conn = this.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)
+        ) {
+            pstmt.setInt(id, getID(user.account.getUsername()));
+            pstmt.executeUpdate();
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        }
+    }
 
     /**
      * Add area if not found in the Areas table
@@ -842,7 +872,9 @@ public class DataRetriever {
             pstmt.setString(2, ride.getSourceArea().toString());
             pstmt.setString(3, ride.getDestinationArea().toString());
             pstmt.setInt(4, ride.getPassengersNo());
-            pstmt.setBoolean(5,ride.getAloneStatus());
+            if (ride.getPassengersNo() > 0) pstmt.setBoolean(5, false);
+            else pstmt.setBoolean(5, true);
+
             pstmt.setString(6, ride.getRideStatus());
             pstmt.executeUpdate();
         } catch (Exception e) {
@@ -880,14 +912,18 @@ public class DataRetriever {
     /**
      * Update the ride status
      *
-     * @param ride   Ride to be updated
+     * @param rideID id of Ride to be updated
      * @param status Updated status of the ride
      */
-    public void updateRideStatus(Ride ride, String status) {
-        try (Connection conn = this.connect()) {
-            stmt = conn.createStatement();
-            String sql = "UPDATE Rides" + "SET RideStatus = " + status + "WHERE IDRides = " + ride.getRideID() + ";";
-            stmt.executeQuery(sql);
+    public void updateRideStatus(int rideID, String status) {
+        String sql = "UPDATE Rides SET RideStatus = ? WHERE IDRides = ? ;";
+        try (Connection conn = this.connect();
+             PreparedStatement psmt = conn.prepareStatement(sql)
+        ) {
+            psmt.setString(1, status);
+            psmt.setInt(2, rideID);
+            psmt.executeUpdate();
+            psmt.close();
         } catch (Exception e) {
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
             System.exit(0);
@@ -914,10 +950,10 @@ public class DataRetriever {
         }
     }
 
-    public void logEvent(Event event){
+    public void logEvent(Event event) {
         String sql = "INSERT INTO Logger (EventType,SourceUser,Info,RideID,DateTime) VAlUES (?,?,?)";
         try (Connection conn = this.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)){
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, event.type);
             pstmt.setString(2, event.source);
             pstmt.setString(3, event.info);
@@ -953,7 +989,7 @@ public class DataRetriever {
             pstmt.setInt(3, carRequest.ride.getRideID());
             pstmt.setDouble(4, 0);
             pstmt.setInt(5, 0);
-            pstmt.setBoolean(6,carRequest.aloneStatus);
+            pstmt.setBoolean(6, carRequest.aloneStatus);
             pstmt.executeUpdate();
             pstmt.close();
             stmt.close();
@@ -1004,7 +1040,7 @@ public class DataRetriever {
      * @param rate   Rating of driver from user from 1 -> 5
      */
     public void rateDriver(User user, Driver driver, int rate) {
-        String pstmtSql = "INSERT OR IGNORE INTO Ratings SET UserID= ? , Rating= ?, DriverID = ?;";
+        String pstmtSql = "INSERT OR IGNORE INTO Ratings (UserID   , Rating, DriverID ) VALUES (?,?,?)";
         try (Connection conn = this.connect();
              PreparedStatement psmt = conn.prepareStatement(pstmtSql)
         ) {
@@ -1012,7 +1048,7 @@ public class DataRetriever {
             psmt.setInt(1, getID(user.account.getUsername()));
             psmt.setInt(2, rate);
             psmt.setInt(3, getID(driver.account.getUsername()));
-            String sql = "UPDATE DriverAccount SET AvgRatings = " + this.calAvgRating(driver);
+            String sql = "UPDATE DriverAccount SET AvgRating = " + this.calAvgRating(driver);
             stmt.executeUpdate(sql);
             psmt.executeUpdate();
             stmt.close();
@@ -1119,7 +1155,7 @@ public class DataRetriever {
             while (rs.next()) {
                 ratings.add(rs.getInt("Rating"));
             }
-            if (!ratings.isEmpty()) {
+            if (! ratings.isEmpty()) {
                 for (int rating : ratings) {
                     sum += rating;
                 }
@@ -1161,6 +1197,249 @@ public class DataRetriever {
             System.exit(0);
         }
         return areasList;
+    }
+
+    //    public void acceptRide(User user,int rideID){
+//        String sql = "SELECT areaName FROM Areas";
+//        try (Connection conn = this.connect();
+//             PreparedStatement psmt = conn.prepareStatement(sql)
+//        ) {}catch (Exception e){
+//            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+//            System.exit(0);
+//        }
+//    }
+    public void acceptRide(User user, Offer offer) {
+        String sql = "SELECT * FROM Offers WHERE DriverName = ?";
+        String sql2 = "UPDATE Requests SET DriverID = ?, driverOffer = ? , IsAccepted = 1 WHERE RideID = ?";
+
+        try (Connection conn = this.connect();
+             PreparedStatement psmt = conn.prepareStatement(sql);
+             PreparedStatement psmt2 = conn.prepareStatement(sql2)
+        ) {
+            psmt.setString(1, offer.toString());
+            ResultSet rs = psmt.executeQuery();
+            int rideID = rs.getInt("RideID");
+            int DriverID = rs.getInt("DriverID");
+            double price = rs.getDouble("Price");
+            psmt2.setInt(1, DriverID);
+            psmt2.setDouble(2, price);
+            psmt2.setInt(3, rideID);
+            psmt2.executeUpdate();
+            psmt.close();
+            psmt2.close();
+            rs.close();
+            changeUserStatus(user, "InRide");
+            changeDriverStatus(getDriver(offer.toString()), "InRide");
+            updateRideStatus(rideID, "InRide");
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        }
+    }
+
+    public void changeUserStatus(User user, String status) {
+        String sql = "UPDATE UserAccounts SET UserStatus = ? WHERE AccountID = ?";
+        try (Connection conn = this.connect();
+             PreparedStatement psmt = conn.prepareStatement(sql)
+        ) {
+            psmt.setInt(2, getID(user.account.getUsername()));
+            psmt.setString(1, status);
+            psmt.executeUpdate();
+            psmt.close();
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        }
+    }
+
+    public void changeDriverStatus(Driver driver, String status) {
+        String sql = "UPDATE DriverAccount SET DriverStatus = ? WHERE DriverID = ?";
+        try (Connection conn = this.connect();
+             PreparedStatement psmt = conn.prepareStatement(sql)
+        ) {
+            psmt.setInt(2, getID(driver.account.getUsername()));
+            psmt.setString(1, status);
+            psmt.executeUpdate();
+            psmt.close();
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        }
+    }
+
+    String getDriverStatus(Driver driver) {
+        String ret = "";
+        String sql = "SELECT DriverStatus FROM DriverAccount WHERE DriverID = ?";
+        try (Connection conn = this.connect();
+             PreparedStatement psmt = conn.prepareStatement(sql)
+        ) {
+            psmt.setInt(1, getID(driver.account.getUsername()));
+            ResultSet rs = psmt.executeQuery();
+            ret = rs.getString("DriverStatus");
+            psmt.close();
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        }
+        return ret;
+    }
+
+    String getUserStatus(User user) {
+        String ret = "";
+        String sql = "SELECT UserStatus FROM UserAccounts WHERE AccountID = ?";
+        try (Connection conn = this.connect();
+             PreparedStatement psmt = conn.prepareStatement(sql)
+        ) {
+            psmt.setInt(1, getID(user.account.getUsername()));
+            ResultSet rs = psmt.executeQuery();
+            ret = rs.getString("UserStatus");
+            psmt.close();
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        }
+        return ret;
+    }
+
+    boolean areaDiscount(int rideID) {
+        boolean ret = false;
+        String sql = "SELECT DestinationArea FROM Rides WHERE IDRides = ?";
+        String sql2 = "SELECT DISCOUNT FROM Areas WHERE AreaName = ?";
+
+        try (Connection conn = this.connect();
+             PreparedStatement psmt = conn.prepareStatement(sql);
+             PreparedStatement psmt2 = conn.prepareStatement(sql2)
+
+        ) {
+            psmt.setInt(1, rideID);
+            ResultSet rs = psmt.executeQuery();
+            String dest = rs.getString("DestinationArea");
+            psmt2.setString(1, dest);
+            rs.close();
+            ResultSet rs2 = psmt2.executeQuery();
+            if (rs2.getInt("DISCOUNT") > 0) {
+                ret = true;
+            }
+            psmt.close();
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        }
+        return ret;
+    }
+
+    boolean isFirstRide(User user) {
+        boolean ret = false;
+        String sql = "SELECT RideID FROM Requests WHERE CustomerID = ?";
+        try (Connection conn = this.connect();
+             PreparedStatement psmt = conn.prepareStatement(sql)
+        ) {
+            psmt.setInt(1, getID(user.account.getUsername()));
+            ResultSet rs = psmt.executeQuery();
+            int c = 0;
+            while (rs.next()) {
+                c++;
+            }
+            if (c == 1) {
+                ret = true;
+            }
+            psmt.close();
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        }
+        return ret;
+    }
+
+    boolean passengerNumCheck(int rideID) {
+        boolean ret = false;
+        String sql = "SELECT PassengersNo FROM Rides WHERE IDRides = ?";
+        try (Connection conn = this.connect();
+             PreparedStatement psmt = conn.prepareStatement(sql)
+        ) {
+            psmt.setInt(1, rideID);
+            ResultSet rs = psmt.executeQuery();
+            if (rs.getInt("PassengersNo") == 2) {
+                ret = true;
+            }
+            psmt.close();
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        }
+        return ret;
+    }
+
+    String getBirthday(User user) {
+        String ret = "";
+        String sql = "SELECT BirthDate FROM Accounts WHERE IDAccount = ?";
+        try (Connection conn = this.connect();
+             PreparedStatement psmt = conn.prepareStatement(sql)
+        ) {
+            psmt.setInt(1, getID(user.account.getUsername()));
+            ResultSet rs = psmt.executeQuery();
+            ret = rs.getString("BirthDate");
+            psmt.close();
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        }
+        return ret;
+    }
+
+    public void endRide(Driver driver) {
+        String sql = "SELECT * FROM Requests WHERE DriverID = ?";
+        String sql2 = "SELECT UserName FROM Accounts WHERE IDAccount = ?";
+        try (Connection conn = this.connect();
+             PreparedStatement psmt = conn.prepareStatement(sql);
+             PreparedStatement psmt2 = conn.prepareStatement(sql2)
+
+        ) {
+            psmt.setInt(1, getID(driver.account.getUsername()));
+            ResultSet rs = psmt.executeQuery();
+            psmt2.setInt(1, rs.getInt("CustomerID"));
+            ResultSet rs2 = psmt2.executeQuery();
+
+            int rideID = rs.getInt("RideID");
+            String username = rs2.getString("UserName");
+            rs2.close();
+            rs.close();
+            psmt.close();
+            psmt2.close();
+            changeDriverStatus(driver, "idle");
+            changeUserStatus(getUser(username), "complete");
+            updateRideStatus(rideID, "Completed");
+            psmt.close();
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        }
+    }
+
+    public String getDriverName(User user) {
+        String ret = "";
+        String sql = "SELECT DriverID FROM Requests WHERE CustomerID = ?";
+        String sql2 = "SELECT UserName FROM Accounts WHERE IDAccount = ?";
+        try (Connection conn = this.connect();
+             PreparedStatement psmt = conn.prepareStatement(sql);
+             PreparedStatement psmt2 = conn.prepareStatement(sql2)
+
+        ) {
+            psmt.setInt(1, getID(user.account.getUsername()));
+            ResultSet rs = psmt.executeQuery();
+            ArrayList<Integer> id = new ArrayList<>();
+            while (rs.next()) {
+                id.add(rs.getInt("DriverID"));
+            }
+            psmt2.setInt(1, id.get(id.size() - 1));
+            ResultSet rs2 = psmt2.executeQuery();
+            ret = rs2.getString("UserName");
+            psmt.close();
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        }
+        return ret;
     }
 }
 

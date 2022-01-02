@@ -37,13 +37,16 @@ public class DriverOperations {
     }
 
 
-
     public ArrayList<Ride> listAllRides(Driver driver) {
         ArrayList<Ride> rides = new ArrayList<>();
         for (Area area : getFavouriteAreas(driver)) {
             rides.addAll(db.getRidesFromArea(driver));
         }
         return rides;
+    }
+
+    public void endRide(Driver driver) {
+        db.endRide(driver);
     }
 //    int rate(Driver driver) {
 //        return db.getRating(db.getID(driver.account.getUsername()));

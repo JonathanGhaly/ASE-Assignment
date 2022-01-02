@@ -1,19 +1,19 @@
-public class Logger{
+public class Logger {
 
     static Logger logger;
     DataRetriever db = DataRetriever.getInstance();
 
-    public static Logger getInstance(){
-        if(logger == null){
+    public static Logger getInstance() {
+        if (logger == null) {
             logger = new Logger();
         }
         return logger;
     }
 
-    private Logger(){
+    private Logger() {
     }
 
-    void log(Event event){
+    void log(Event event) {
         db.logEvent(event);
     }
 }

@@ -1,21 +1,22 @@
 import java.sql.Timestamp;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.Scanner;
 
 public class Main {
     static int choice;
     static boolean isLoggedIn = false, isDriver = false, isAdmin = false;
     static Driver driver = null;
-    static DriverOperations driverOperations = null;
     static User user = null;
     static Admin admin = null;
     static Scanner in = new Scanner(System.in);
-    static String username, password, email, phoneNo, source, dest,birthDayString;
+    static String username, password, email, phoneNo, birthDayString;
     static Date BirthDay;
-    static double offer = 0;
+    static UI ui;
 
     public static void main(String[] args) {
         System.out.println("Welcome to soo2Werkab");
@@ -41,6 +42,7 @@ public class Main {
                 break;
             }
             case 2: {
+                Register r = new Register();
                 System.out.println("Please enter username: ");
                 username = in.next();
                 System.out.println("Please enter the password: ");
@@ -50,21 +52,30 @@ public class Main {
                 email = in.nextLine();
                 System.out.println("Please enter the phone number: ");
                 phoneNo = in.next();
+                if (! r.validateMobileNumber(phoneNo)) {
+                    System.out.println("===========================================");
+                    System.out.println("Wrong phone number format please try again");
+                    System.out.println("===========================================");
+                    break;
+                }
                 System.out.println("Please enter Your BirthDate Day/Month/Year: ");
                 birthDayString = in.next();
-                try {
-                    BirthDay = new SimpleDateFormat("dd/MM/YYYY").parse(birthDayString);
-
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
-                Account acc = new Account(username, password, email, phoneNo,BirthDay);
+//                Date dt = new Date();
+//                try {
+//                    SimpleDateFormat BirthDay = new SimpleDateFormat("dd/MM/YYYY", Locale.ENGLISH);
+//                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+//                    dt = BirthDay.parse(birthDayString);
+//
+//                } catch (ParseException e) {
+//                    e.printStackTrace();
+//                }
+                Account acc = new Account(username, password, email, phoneNo, birthDayString);
                 System.out.println("1- To register as user\n2- To register as driver");
                 choice = in.nextInt();
                 switch (choice) {
                     case 1:
-                        Register r = new Register(acc, false);
-                        isDriver=false;
+                        r = new Register(acc, false);
+                        isDriver = false;
                         break;
                     case 2:
                         r = new Register(acc, true);
@@ -85,64 +96,11 @@ public class Main {
         }
         while (isLoggedIn) {
             if (isAdmin) {
-                AdminUI ui = new AdminUI(admin);
+                ui = new AdminUI(admin);
             } else if (isDriver) {
-                driverOperations = new DriverOperations();
-                System.out.println("1- Set favorite area\n2- List favorite areas\n3- List favorite rides available\n4- Show my rating\n5- Remove favorite area\n6- Logout");
-                choice = in.nextInt();
-                switch (choice) {
-                    case 1:
-                        System.out.println("Please Enter area to add to favorite");
-                        in.skip("\n");
-                        source = in.nextLine();
-                        Area a = new Area(source);
-                        driverOperations.addFavouriteArea(driver,a);
-                        break;
-                    case 2:
-                        for (Area area : driverOperations.getFavouriteAreas(driver)) {
-                            System.out.println(area.areaName);
-                        }
-                        break;
-                    case 3:
-                        while (choice > - 1) {
-                            for (Ride ride : driverOperations.listAllRides(driver)) {
-                                System.out.println(ride.getRideID() + " from " + ride.getSourceArea().toString() + " to " + ride.getDestinationArea().toString());
-                            }
-                            System.out.println("Enter 0 to refresh list or Enter ride ID to make offer");
-                            int driverOffer = in.nextInt();
-                            if (driverOffer > 0) {  //TODO Refactor  Known Bug didnt refresh correctly
-                                for (Ride ride : driverOperations.listAllRides(driver)) {
-                                    if (ride.getRideID() == driverOffer) {
-                                        System.out.println("Please enter the price");
-                                        Double offerPrice = in.nextDouble();
-                                        Offer offer = new Offer(offerPrice, driver);
-                                        driverOperations.sendOffer(driver,ride, offerPrice);
-                                        choice = 0;
-                                    }
-                                }
-                            }
-                            System.out.println("Enter 0 to refresh list or -1 to exit"); //TODO ADD REFRESH
-                            choice = in.nextInt();
-
-                        }
-                        break;
-                    case 4:
-                        System.out.println("Your rate is: " + driverOperations.showRating(driver));
-                        break;
-                    case 5:
-                        System.out.println("Please enter the area name you want to remove");
-                        String areaName = in.next();
-                        Area area = new Area(areaName);
-                        driverOperations.removeFavouriteArea(driver,area);
-                        break;
-                    case 6:
-                        return;
-                    default:
-                        System.out.println("Wrong command");
-                }
-
+                ui = new DriverUI(driver);
             } else {
-                UserUI ui = new UserUI(user);
+                ui = new UserUI(user);
             }
         }
     }

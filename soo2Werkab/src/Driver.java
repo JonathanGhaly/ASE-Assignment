@@ -19,4 +19,8 @@ public class Driver {
         this.isAccepted = isAccepted;
         this.balance = balance;
     }
+
+    public String getDriverStatus() {
+        return db.getDriverStatus(this);
+    }
 }

@@ -8,7 +8,7 @@ public class Event {
     int rideID;
     String time;
 
-    Event(EventType eventType, String source, String info, int rideID, Date time){
+    Event(EventType eventType, String source, String info, int rideID, Date time) {
         this.type = eventType.toString();
         this.source = source;
         this.info = info;
@@ -16,7 +16,7 @@ public class Event {
         this.time = time.toString();
     }
 
-    Event(EventType eventType, String source, String info, int rideID, String time){
+    Event(EventType eventType, String source, String info, int rideID, String time) {
         this.type = eventType.toString();
         this.source = source;
         this.info = info;

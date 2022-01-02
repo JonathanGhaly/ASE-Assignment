@@ -1,28 +1,17 @@
 import java.util.Date;
 
 
-
 public class Account extends EventListener {
 
     private String username;
     private String password;
     private String email;
     private String mobileNumber;
-    private Date birthDate;
+    //    private Date birthDate;
+    String birthDate;
     private boolean isSuspended;
     private DataRetriever db;
-    /**
-     * This method is used to check if the phone number is valid in Egypt
-     * @param mobileNumber the phone number to check
-     * @return false if number is not valid true if valid
-     */
-    private boolean validateMobileNumber(String mobileNumber) {
-        if (mobileNumber.length() != 11) return false;
 
-        String firstThree = mobileNumber.substring(0, 3);
-        if (!firstThree.equals("010") && !firstThree.equals("011") && !firstThree.equals("012") && !firstThree.equals("015")) return false;
-        return true;
-    }
     public Account(String username, String password, String email, String mobileNumber) {
         this.username = username;
         this.password = password;
@@ -31,7 +20,8 @@ public class Account extends EventListener {
         isSuspended = false;
         db = DataRetriever.getInstance();
     }
-    public Account(String username, String password, String email, String mobileNumber, Date birthDate) {
+
+    public Account(String username, String password, String email, String mobileNumber, String birthDate) {
         this.username = username;
         this.password = password;
         this.email = email;
@@ -54,9 +44,7 @@ public class Account extends EventListener {
     }
 
     public void setMobileNumber(String mobileNumber) {
-
-        if (validateMobileNumber(mobileNumber))
-            this.mobileNumber = mobileNumber;
+        this.mobileNumber = mobileNumber;
     }
 
     public void setSuspended(boolean suspended) {
@@ -84,11 +72,11 @@ public class Account extends EventListener {
     }
 
     @Override
-    public void update(){
-        
+    public void update() {
+
     }
 
-    public Date getBirthDate() {
+    public String getBirthDate() {
         return birthDate;
     }
 }
